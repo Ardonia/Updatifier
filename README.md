@@ -35,8 +35,8 @@ If you wish to add Updatifier support to your plugin, check the Wiki for detaile
 
 :heavy_dollar_sign: [**Support Me**][5]
 
-[1]: https://github.com/Flibio/EconomyLite/releases
-[2]: https://github.com/Flibio/EconomyLite/issues
-[3]: https://github.com/Flibio/EconomyLite
-[4]: https://github.com/Flibio/EconomyLite/wiki
+[1]: https://github.com/Flibio/Updatifier/releases
+[2]: https://github.com/Flibio/Updatifier/issues
+[3]: https://github.com/Flibio/Updatifier
+[4]: https://github.com/Flibio/Updatifier/wiki
 [5]: http://flibio.weebly.com/support-me.html
