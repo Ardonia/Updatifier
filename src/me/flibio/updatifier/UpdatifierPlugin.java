@@ -19,6 +19,7 @@ import java.lang.annotation.Annotation;
 import java.util.HashMap;
 
 @Plugin(id = "Updatifier", name = "Updatifier", version = "1.0.0")
+@Updatifier(repoName = "Updatifier", repoOwner = "Flibio", version = "v1.0.0")
 public class UpdatifierPlugin {
 	
 	private HashMap<String, String> updates = new HashMap<String, String>();
