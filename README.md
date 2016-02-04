@@ -1,51 +1,42 @@
-# Updatifier
+## Updatifier
 
-Updatifier is a simple Sponge plugin that allows other plugins to easily check if they have an update available.
+Updatifier is a simple Sponge plugin that allows other plugins to easily check if they have an update available. Updatifier contacts GitHub Releases to check for the latest version available, and reports back to the server to let you know if there is an update available.
 
-###Server Administrators
+####Installation
 
-To install Updatifier on your Sponge server, simply move the JAR into your `mods` folder. Plugin developers need to add support for Updatifier to their plugins in order for Updatifier to check for updates to that plugin. Updatifier is not required, meaning if you download a plugin that has support for Updatifier, and you do not have Updatifier installed, no errors will be thrown to the console.
+To install Updatifier, simply download the latest release and place it in your `mods` folder. Restart your start your server and Updatifier will initialize! 
 
-###Plugin Developers
+####Usage
 
-It is extremely simple to add Updatifier support into your plugin. There are two simple steps to follow:
+Updatifier will log messages to the console if an update is available. If a player has the permission `updatifier.notify` when they join the server, they will notified of any updates that are available.
 
-1. Add Updatifier as a Maven or Gradle dependency.
-2. Annotate your main plugin class and add Updatifier as an `after` dependency.
+####Plugins Using Updatifier
 
-#####Adding Updatifier as a Maven/Gradle Dependency
+If you utilize Updatifier in your plugin, send me a PM on the forum and I will add your plugin to this list.
 
-Updatifier uses [**JitPack**](https://jitpack.io/) to allow you to add Updatifier as a Maven/Gradle dependency. To get started you need to add JitPack as a repository in your pom.xml:
+####Planned Features
 
-```xml
-<repository>
-    <id>jitpack.io</id>
-    <url>https://jitpack.io</url>
-</repository>
-```
+- Document and improve the API
+- Implement support for automatic downloads
 
-Next you will want to add Updatifer as a dependency:
+####Developers
 
-```xml
-<dependency>
-    <groupId>com.github.Flibio</groupId>
-    <artifactId>EconomyLite</artifactId>
-    <version>RELEASE</version>
-</dependency>
-```
+If you wish to add Updatifier support to your plugin, check the Wiki for detailed instructions!
 
-The steps are the essentially the same for Gradle, with just a few formatting changes.
+---
 
-#####Annotating Your Main Plugin Class
+:inbox_tray: [**Download Updatifier**][1]
 
-In order for Updatifier to check for updates to your plugin, it needs to know some information about your plugin. To do that, you must annotate your main plugin class with `@Updatifier`, similar to how you annotate for Sponge with `@Plugin`. You also must add Updatifier as an `after` dependency. An example can be seen below.
+:memo: [**Issue & Suggestions**][2]
 
-```java
-@Updatifier(repoName = "EconomyLite", repoOwner = "Flibio", version = "v1.1.0")
-@Plugin(id = "EconomyLite", name = "EconomyLite", version = "1.1.0", dependencies = "after: Updatifier")
-public class MyClass {
+:wrench: [**Source Code**][3]
 
-}
-```
+:books: [**Wiki**][4]
 
-Updatifier is not required, meaning if you add support for Updatifier, and a server owner does not have Updatifier installed, no errors will be thrown to the console. The Updatifier annotation will simply be ignored.
+:heavy_dollar_sign: [**Support Me**][5]
+
+[1]: https://github.com/Flibio/EconomyLite/releases
+[2]: https://github.com/Flibio/EconomyLite/issues
+[3]: https://github.com/Flibio/EconomyLite
+[4]: https://github.com/Flibio/EconomyLite/wiki
+[5]: http://flibio.weebly.com/support-me.html
