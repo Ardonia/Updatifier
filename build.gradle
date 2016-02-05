@@ -1,0 +1,84 @@
+plugins {
+  id 'java'
+  id 'com.github.hierynomus.license' version '0.12.1'
+  id 'net.ellune.blossom' version '1.0.1'
+}
+
+defaultTasks 'licenseFormat', 'clean', 'build'
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+blossom {
+    replaceToken '@project.version@', project.version, 'src/me/flibio/updatifier/PluginInfo.java'
+}
+
+archivesBaseName = project.name
+version = "v${project.version}-r${project.apiVersion.split("-")[0]}"
+
+repositories {
+  mavenCentral()
+  jcenter()
+  maven {
+    name 'Sponge maven repo'
+    url 'http://repo.spongepowered.org/maven'
+  }
+  maven {
+    name = 'minecrell-releases'
+    url = 'http://repo.minecrell.net/releases'
+  }
+}
+
+configurations {
+  shade
+  compile.extendsFrom shade
+}
+
+sourceSets {
+  api.java.srcDir 'api'
+  main {
+    java.srcDir 'src'
+    compileClasspath += api.output
+  }
+}
+
+dependencies {
+  compile "org.spongepowered:spongeapi:${project.apiVersion}"
+  apiCompile "org.spongepowered:spongeapi:${project.apiVersion}"
+  shade 'net.minecrell.mcstats:statslite-sponge:0.2.1'
+}
+
+task apiJar(type: Jar) {
+  classifier = 'api'
+  from sourceSets.api.output
+}
+
+jar {
+  from sourceSets.api.output
+  from sourceSets.main.output
+  configurations.shade.copyRecursive().setTransitive(false).each { artifact ->
+    from (zipTree(artifact))
+  }
+}
+
+license {
+  ext.name = project.name
+  ext.organization = project.organization
+  ext.url = project.url
+  ext.inceptionYear = project.inceptionYear
+  ext.currentYear = project.currentYear
+  header rootProject.file('HEADER.txt')
+  ignoreFailures true
+  strictCheck true
+  include '**/*.java'
+}
+
+build.dependsOn apiJar
+
+task wrapper(type: Wrapper) {
+  gradleVersion = '2.10'
+}
+
+tasks.withType(Javadoc) {
+  options.addStringOption('Xdoclint:none', '-quiet')
+}
