@@ -18,21 +18,29 @@ repositories {
     name 'Sponge maven repo'
     url 'http://repo.spongepowered.org/maven'
   }
+  maven {
+    name = 'minecrell-releases'
+    url = 'http://repo.minecrell.net/releases'
+  }
 }
 
-dependencies {
-  compile "org.spongepowered:spongeapi:${project.apiVersion}"
+configurations {
+  shade
+  compile.extendsFrom shade
 }
 
 sourceSets {
-  api {
-    java.srcDir 'api'
-    compileClasspath += configurations.compile
-  }
+  api.java.srcDir 'api'
   main {
     java.srcDir 'src'
     compileClasspath += api.output
   }
+}
+
+dependencies {
+  compile "org.spongepowered:spongeapi:${project.apiVersion}"
+  apiCompile "org.spongepowered:spongeapi:${project.apiVersion}"
+  shade 'net.minecrell.mcstats:statslite-sponge:0.2.1'
 }
 
 task apiJar(type: Jar) {
@@ -43,6 +51,9 @@ task apiJar(type: Jar) {
 jar {
   from sourceSets.api.output
   from sourceSets.main.output
+  configurations.shade.copyRecursive().setTransitive(false).each { artifact ->
+    from (zipTree(artifact))
+  }
 }
 
 license {

@@ -25,6 +25,7 @@
 package me.flibio.updatifier;
 
 import com.google.inject.Inject;
+import net.minecrell.mcstats.SpongeStatsLite;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
@@ -33,7 +34,6 @@ import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.plugin.Plugin;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -47,6 +47,9 @@ public class UpdatifierPlugin {
     @Inject
     private Logger logger;
 
+    @Inject
+    private SpongeStatsLite statsLite;
+
     private HashMap<String, String> updates = new HashMap<>();
     private UpdatifierAPI api = new UpdatifierAPI();
 
@@ -54,11 +57,12 @@ public class UpdatifierPlugin {
     public void onPreInitialize(GamePreInitializationEvent event) {
         //Register the Updatifier API
         Sponge.getGame().getServiceManager().setProvider(this, UpdatifierAPI.class, api);
+        this.statsLite.start();
     }
 
     @Listener
     public void started(GameStartedServerEvent event) {
-        for (PluginContainer pluginC : Sponge.getPluginManager().getPlugins()) {
+        Sponge.getPluginManager().getPlugins().forEach(pluginC -> {
             if (pluginC.getInstance().isPresent()) {
                 if (pluginC.getInstance().get().getClass().isAnnotationPresent(Updatifier.class)) {
                     Updatifier info = pluginC.getInstance().get().getClass().getAnnotation(Updatifier.class);
@@ -76,8 +80,9 @@ public class UpdatifierPlugin {
                     }).async().submit(this);
                 }
             }
-        }
+        });
     }
+
 
     @Listener
     public void onJoin(ClientConnectionEvent.Join event) {
