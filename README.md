@@ -21,15 +21,13 @@ If you have added Updatifier support in your plugin, and want to be featured on 
 - Document and improve the API
 - Implement support for automatic downloads
 - Support for changelogs
-- Configuration file
+- Ore support
 
 ####Developers
 
 Please view the wiki for a detailed list of instructions and examples on how to add Updatifier support in your plugin.
 
 ---
-
-**Note:** Currently, Updatifier will check for updates to itself, an option to disable this will be added soon. 
 
 :inbox_tray: [**Download Updatifier**][1]
 
