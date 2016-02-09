@@ -33,28 +33,28 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface Updatifier {
 
-	/**
-	 * Gets the owner of the GitHub repository that the releases are hosted on.
-	 *
-	 * @return The owner of the GitHub repository that the releases are hosted
-	 *         on.
-	 */
-	String repoOwner();
+    /**
+     * Gets the owner of the GitHub repository that the releases are hosted on.
+     *
+     * @return The owner of the GitHub repository that the releases are hosted
+     *         on.
+     */
+    String repoOwner();
 
-	/**
-	 * Gets the name of the GitHub repository that the releases are hosted on.
-	 *
-	 * @return The name of the GitHub repository that the releases are hosted
-	 *         on.
-	 */
-	String repoName();
+    /**
+     * Gets the name of the GitHub repository that the releases are hosted on.
+     *
+     * @return The name of the GitHub repository that the releases are hosted
+     *         on.
+     */
+    String repoName();
 
-	/**
-	 * Gets the current version of the plugin. Must be exactly the same as the
-	 * corresponding tag on GitHub.
-	 *
-	 * @return The current version of the plugin
-	 */
-	String version();
+    /**
+     * Gets the current version of the plugin. Must be exactly the same as the
+     * corresponding tag on GitHub.
+     *
+     * @return The current version of the plugin
+     */
+    String version();
 
 }

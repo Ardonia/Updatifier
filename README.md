@@ -18,9 +18,6 @@ If you have added Updatifier support in your plugin, and want to be featured on 
 
 ####Planned Features
 
-- Document and improve the API
-- Implement support for automatic downloads
-- Support for changelogs
 - Ore support
 
 ####Developers

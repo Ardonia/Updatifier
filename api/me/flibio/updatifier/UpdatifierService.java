@@ -24,71 +24,138 @@
  */
 package me.flibio.updatifier;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.spongepowered.api.Sponge;
+
+import com.google.gson.Gson;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Optional;
 
 public class UpdatifierService {
 
-	protected UpdatifierService() {
-	}
+    private HashMap<String, ReleaseData> releases = new HashMap<String, ReleaseData>();
 
-	/**
-	 * Gets the instance stored in the
-	 * {@link org.spongepowered.api.service.ServiceManager} of Sponge API.
-	 *
-	 * @return The instance of {@link UpdatifierService}
-	 */
-	public static UpdatifierService getInstance() {
-		Optional<UpdatifierService> optInstance = Sponge.getGame().getServiceManager().provide(UpdatifierService.class);
-		assert optInstance.isPresent() : "Updatifier API has not initialized yet";
-		return optInstance.get();
-	}
+    protected UpdatifierService() {
+    }
 
-	/**
-	 * Checks if an update is available for the specified GitHub repository.
-	 * Connects to GitHub, so it should be run in an async thread.
-	 *
-	 * @param repoOwner
-	 *        The owner of the repository
-	 * @param repoName
-	 *        The name of the repository
-	 * @param currentVersion
-	 *        The current plugin version to check against the latest release tag
-	 * @return If an update is available or not
-	 */
-	public boolean updateAvailable(String repoOwner, String repoName, String currentVersion) {
-		String latestRelease = HttpUtils.requestData("https://api.github.com/repos/" + repoOwner + "/" + repoName + "/releases/latest");
-		String taggedRelease = HttpUtils.requestData("https://api.github.com/repos/" + repoOwner + "/" + repoName + "/releases/tags/"
-			+ currentVersion);
-		if (latestRelease.toLowerCase().contains("\"message\": \"not found\"")
-			|| taggedRelease.toLowerCase().contains("\"message\": \"not found\"")) {
-			// An error ocurred
-			return false;
-		}
-		// Attempt to get the time released
-		Gson gson = new GsonBuilder().create();
-		ReleaseData lReleaseData = gson.fromJson(latestRelease, ReleaseData.class);
-		ReleaseData tReleaseData = gson.fromJson(taggedRelease, ReleaseData.class);
-		if (lReleaseData == null || tReleaseData == null || lReleaseData.publishedAt() == null || tReleaseData.publishedAt() == null) {
-			return false;
-		}
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss");
-		String latestTime = lReleaseData.publishedAt();
-		String taggedTime = tReleaseData.publishedAt();
-		Date latestDate, taggedDate;
-		try {
-			latestDate = formatter.parse(latestTime.replaceAll("T", " ").replaceAll("Z", ""));
-			taggedDate = formatter.parse(taggedTime.replaceAll("T", " ").replaceAll("Z", ""));
-			return taggedDate.before(latestDate);
-		} catch (ParseException e) {
-			return false;
-		}
-	}
+    /**
+     * Gets the instance stored in the
+     * {@link org.spongepowered.api.service.ServiceManager} of Sponge API.
+     *
+     * @return The instance of {@link UpdatifierService}
+     */
+    public static UpdatifierService getInstance() {
+        Optional<UpdatifierService> optInstance = Sponge.getGame().getServiceManager().provide(UpdatifierService.class);
+        assert optInstance.isPresent() : "Updatifier API has not initialized yet";
+        return optInstance.get();
+    }
+
+    /**
+     * Checks if an update is available for the specified GitHub repository.
+     * Connects to GitHub, so it should be run in an async thread.
+     *
+     * @param repoOwner The owner of the repository
+     * @param repoName The name of the repository
+     * @param currentVersion The current plugin version to check against the
+     *        latest release tag
+     * @return If an update is available or not
+     */
+    public boolean updateAvailable(String repoOwner, String repoName, String currentVersion) {
+        String latestRelease = HttpUtils.requestData("https://api.github.com/repos/" + repoOwner + "/" + repoName + "/releases/latest");
+        String taggedRelease = HttpUtils.requestData("https://api.github.com/repos/" + repoOwner + "/" + repoName + "/releases/tags/"
+                + currentVersion);
+        if (latestRelease.toLowerCase().contains("\"message\": \"not found\"")
+                || taggedRelease.toLowerCase().contains("\"message\": \"not found\"")) {
+            // An error ocurred
+            return false;
+        }
+        // Attempt to get the time released
+        Gson gson = new Gson();
+        ReleaseData lReleaseData = gson.fromJson(latestRelease, ReleaseData.class);
+        ReleaseData tReleaseData = gson.fromJson(taggedRelease, ReleaseData.class);
+        if (lReleaseData == null || tReleaseData == null || lReleaseData.publishedAt() == null || tReleaseData.publishedAt() == null
+                || lReleaseData.assets() == null || lReleaseData.getName() == null || lReleaseData.getUrl() == null || lReleaseData.body() == null) {
+            return false;
+        }
+        releases.put(repoOwner + "/" + repoName, lReleaseData);
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss");
+        String latestTime = lReleaseData.publishedAt();
+        String taggedTime = tReleaseData.publishedAt();
+        Date latestDate, taggedDate;
+        try {
+            latestDate = formatter.parse(latestTime.replaceAll("T", " ").replaceAll("Z", ""));
+            taggedDate = formatter.parse(taggedTime.replaceAll("T", " ").replaceAll("Z", ""));
+            return taggedDate.before(latestDate);
+        } catch (ParseException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Gets the download URL for the latest release of the specified GitHub
+     * repository.
+     * 
+     * @param repoOwner The owner of the repository
+     * @param repoName The name of the repository
+     * @return The download URL of the latest release
+     */
+    public String getDownloadUrl(String repoOwner, String repoName) {
+        if (!releases.containsKey(repoOwner + "/" + repoName))
+            return "";
+        ReleaseData releaseData = releases.get(repoOwner + "/" + repoName);
+        if (releaseData.assets().length < 1) {
+            return "";
+        }
+        return releaseData.assets()[0].browserDownloadUrl();
+    }
+
+    /**
+     * Gets the file name for the latest release of the specified GitHub
+     * repository.
+     * 
+     * @param repoOwner The owner of the repository
+     * @param repoName The name of the repository
+     * @return The file name of the latest release
+     */
+    public String getFileName(String repoOwner, String repoName) {
+        if (!releases.containsKey(repoOwner + "/" + repoName))
+            return "";
+        ReleaseData releaseData = releases.get(repoOwner + "/" + repoName);
+        if (releaseData.assets().length < 1) {
+            return "";
+        }
+        return releaseData.assets()[0].name();
+    }
+
+    /**
+     * Gets the tag for the latest release of the specified GitHub repository.
+     * 
+     * @param repoOwner The owner of the repository
+     * @param repoName The name of the repository
+     * @return The tag of the latest release
+     */
+    public String getTag(String repoOwner, String repoName) {
+        if (!releases.containsKey(repoOwner + "/" + repoName))
+            return "";
+        ReleaseData releaseData = releases.get(repoOwner + "/" + repoName);
+        return releaseData.getName();
+    }
+
+    /**
+     * Gets the body for the latest release of the specified GitHub repository.
+     * 
+     * @param repoOwner The owner of the repository
+     * @param repoName The name of the repository
+     * @return The body of the latest release
+     */
+    public String getBody(String repoOwner, String repoName) {
+        if (!releases.containsKey(repoOwner + "/" + repoName))
+            return "";
+        ReleaseData releaseData = releases.get(repoOwner + "/" + repoName);
+        return releaseData.body();
+    }
 
 }

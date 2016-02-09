@@ -37,88 +37,88 @@ import java.io.IOException;
 
 public class FileManager {
 
-	private Logger logger;
-	private ConfigurationNode configRoot;
+    private Logger logger;
+    private ConfigurationNode configRoot;
 
-	public FileManager(Logger logger) {
-		this.logger = logger;
-	}
+    public FileManager(Logger logger) {
+        this.logger = logger;
+    }
 
-	public void testDefault(String path, Object value) {
-		if (configRoot != null) {
-			// Check if the configuration file doesn't contain the path
-			if (configRoot.getNode((Object[]) path.split("\\.")).getValue() == null) {
-				// Set the path to the default value
-				configRoot.getNode((Object[]) path.split("\\.")).setValue(value);
-				saveConfigFile(configRoot);
-			}
-		}
-	}
+    public void testDefault(String path, Object value) {
+        if (configRoot != null) {
+            // Check if the configuration file doesn't contain the path
+            if (configRoot.getNode((Object[]) path.split("\\.")).getValue() == null) {
+                // Set the path to the default value
+                configRoot.getNode((Object[]) path.split("\\.")).setValue(value);
+                saveConfigFile(configRoot);
+            }
+        }
+    }
 
-	public String getConfigValue(String path) {
-		if (configRoot != null) {
-			// Check if the configuration file contains the path
-			if (configRoot.getNode((Object[]) path.split("\\.")).getValue() != null) {
-				// Get the value and return it
-				return configRoot.getNode((Object[]) path.split("\\.")).getString();
-			} else {
-				return "";
-			}
-		} else {
-			return "";
-		}
-	}
+    public String getConfigValue(String path) {
+        if (configRoot != null) {
+            // Check if the configuration file contains the path
+            if (configRoot.getNode((Object[]) path.split("\\.")).getValue() != null) {
+                // Get the value and return it
+                return configRoot.getNode((Object[]) path.split("\\.")).getString();
+            } else {
+                return "";
+            }
+        } else {
+            return "";
+        }
+    }
 
-	public void generateFolder(String path) {
-		File folder = new File(path);
-		try {
-			if (!folder.exists()) {
-				folder.mkdir();
-			}
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-		}
-	}
+    public void generateFolder(String path) {
+        File folder = new File(path);
+        try {
+            if (!folder.exists()) {
+                folder.mkdir();
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        }
+    }
 
-	public void generateFile(String path) {
-		File file = new File(path);
-		try {
-			if (!file.exists()) {
-				file.createNewFile();
-			}
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-		}
-	}
+    public void generateFile(String path) {
+        File file = new File(path);
+        try {
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        }
+    }
 
-	public void loadConfigFile() {
-		String fileName = "config.conf";
-		ConfigurationLoader<?> manager = HoconConfigurationLoader.builder().setFile(new File("config/Updatifier/" + fileName)).build();
-		ConfigurationNode root;
-		try {
-			root = manager.load();
-		} catch (IOException e) {
-			logger.error(e.getMessage());
-			return;
-		} catch (ConfigException e) {
-			logger.error(e.getMessage());
-			return;
-		}
-		configRoot = root;
-	}
+    public void loadConfigFile() {
+        String fileName = "config.conf";
+        ConfigurationLoader<?> manager = HoconConfigurationLoader.builder().setFile(new File("config/Updatifier/" + fileName)).build();
+        ConfigurationNode root;
+        try {
+            root = manager.load();
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+            return;
+        } catch (ConfigException e) {
+            logger.error(e.getMessage());
+            return;
+        }
+        configRoot = root;
+    }
 
-	public ConfigurationNode getConfigFile() {
-		return configRoot;
-	}
+    public ConfigurationNode getConfigFile() {
+        return configRoot;
+    }
 
-	public void saveConfigFile(ConfigurationNode root) {
-		String fileName = "config.conf";
-		ConfigurationLoader<?> manager = HoconConfigurationLoader.builder().setFile(new File("config/Updatifier/" + fileName)).build();
-		try {
-			manager.save(root);
-		} catch (IOException e) {
-			logger.error(e.getMessage());
-		}
-	}
+    public void saveConfigFile(ConfigurationNode root) {
+        String fileName = "config.conf";
+        ConfigurationLoader<?> manager = HoconConfigurationLoader.builder().setFile(new File("config/Updatifier/" + fileName)).build();
+        try {
+            manager.save(root);
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+        }
+    }
 
 }
