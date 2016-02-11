@@ -24,37 +24,16 @@
  */
 package me.flibio.updatifier;
 
-public class ReleaseData {
+public class AssetData {
 
-    private String tag_name;
-    private String body;
-    private boolean prerelease;
-    private String html_url;
-    private String published_at;
-    private AssetData[] assets;
+    private String browser_download_url;
+    private String name;
 
-    public String getName() {
-        return tag_name;
+    public String name() {
+        return name;
     }
 
-    public String getUrl() {
-        return html_url;
+    public String browserDownloadUrl() {
+        return browser_download_url;
     }
-
-    public String publishedAt() {
-        return published_at;
-    }
-
-    public boolean isPreRelease() {
-        return prerelease;
-    }
-
-    public String body() {
-        return body;
-    }
-
-    public AssetData[] assets() {
-        return assets;
-    }
-
 }
