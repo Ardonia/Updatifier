@@ -1,5 +1,6 @@
 plugins {
   id 'java'
+  id 'maven'
   id 'com.github.hierynomus.license' version '0.12.1'
   id 'net.ellune.blossom' version '1.0.1'
 }
@@ -75,8 +76,12 @@ license {
 
 build.dependsOn apiJar
 
+artifacts {
+  archives apiJar
+}
+
 task wrapper(type: Wrapper) {
-  gradleVersion = '2.10'
+  gradleVersion = '2.11'
 }
 
 tasks.withType(Javadoc) {

@@ -26,113 +26,63 @@ package me.flibio.updatifier;
 
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
+import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
+import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializerCollection;
 import org.slf4j.Logger;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 public class FileManager {
 
-<<<<<<< HEAD
-    private static final Map<TypeToken<?>, TypeSerializer<?>> serializers = new HashMap<>();
-
     private final Logger logger;
-    private final File configFile;
-    private final HoconConfigurationLoader manager;
+    private final ConfigurationLoader<CommentedConfigurationNode> manager;
     private final ConfigurationNode configRoot;
-    private final TypeSerializerCollection collection;
 
-    public FileManager(Logger logger, Path path, String configName) {
+    public FileManager(Logger logger, ConfigurationLoader<CommentedConfigurationNode> loader) {
         this.logger = logger;
-        this.configFile = path.toAbsolutePath().resolve(configName).toFile();
-        this.manager = HoconConfigurationLoader.builder().setFile(configFile).build();
+        this.manager = loader;
         try {
             this.configRoot = this.manager.load();
         } catch (IOException e) {
             logger.error(e.getMessage());
             throw new RuntimeException(e);
         }
-        this.collection = this.configRoot.getOptions().getSerializers();
     }
 
-    public <T> void addType(Class<T> type, TypeSerializer<? super T> serializer) {
-        this.collection.registerType(TypeToken.of(type), serializer);
+    public FileManager(Logger logger, Path path, String configName) {
+        this(logger, HoconConfigurationLoader.builder().setPath(path.toAbsolutePath().resolve(configName)).build());
     }
 
     public <T> void testDefault(String path, Class<T> type, T value) {
         try {
-            if (configRoot.getNode(path.split("\\.")).getValue(TypeToken.of(type)) == null) {
+            if (configRoot.getNode((Object[]) path.split("\\.")).getValue(TypeToken.of(type)) == null) {
                 set(path, type, value);
             }
         } catch (ObjectMappingException e) {
-=======
-    private Logger logger;
-    private ConfigurationNode configRoot;
-
-    public FileManager(Logger logger) {
-        this.logger = logger;
-    }
-
-    public void testDefault(String path, Object value) {
-        if (configRoot != null) {
-            // Check if the configuration file doesn't contain the path
-            if (configRoot.getNode((Object[]) path.split("\\.")).getValue() == null) {
-                // Set the path to the default value
-                configRoot.getNode((Object[]) path.split("\\.")).setValue(value);
-                saveConfigFile(configRoot);
-            }
-        }
-    }
-
-    public String getConfigValue(String path) {
-        if (configRoot != null) {
-            // Check if the configuration file contains the path
-            if (configRoot.getNode((Object[]) path.split("\\.")).getValue() != null) {
-                // Get the value and return it
-                return configRoot.getNode((Object[]) path.split("\\.")).getString();
-            } else {
-                return "";
-            }
-        } else {
-            return "";
-        }
-    }
-
-    public void generateFolder(String path) {
-        File folder = new File(path);
-        try {
-            if (!folder.exists()) {
-                folder.mkdir();
-            }
-        } catch (Exception e) {
->>>>>>> refs/remotes/Flibio/master
             logger.error(e.getMessage());
         }
     }
 
-<<<<<<< HEAD
     public <T> void set(String path, Class<T> type, T value) {
-        ConfigurationNode node = configRoot.getNode(path.split("\\."));
-        node.getOptions().setAcceptedTypes(null).setSerializers(collection);
+        ConfigurationNode node = configRoot.getNode((Object[]) path.split("\\."));
         try {
             node.setValue(TypeToken.of(type), value);
         } catch (ObjectMappingException e) {
             logger.error(e.getMessage());
         }
-        saveConfigFile(configRoot);
+        try {
+            manager.save(node);
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+        }
     }
 
     public <T> Optional<T> getConfigValue(String path, Class<T> type) {
-        ConfigurationNode node = configRoot.getNode(path.split("\\."));
-        node.getOptions().setAcceptedTypes(null).setSerializers(collection);
+        ConfigurationNode node = configRoot.getNode((Object[]) path.split("\\."));
         try {
             T value = node.getValue(TypeToken.of(type));
             return Optional.ofNullable(value);
@@ -149,50 +99,6 @@ public class FileManager {
         }
         set(path, type, value);
         return value;
-    }
-
-    public void saveConfigFile(ConfigurationNode root) {
-=======
-    public void generateFile(String path) {
-        File file = new File(path);
-        try {
-            if (!file.exists()) {
-                file.createNewFile();
-            }
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-        }
-    }
-
-    public void loadConfigFile() {
-        String fileName = "config.conf";
-        ConfigurationLoader<?> manager = HoconConfigurationLoader.builder().setFile(new File("config/Updatifier/" + fileName)).build();
-        ConfigurationNode root;
-        try {
-            root = manager.load();
-        } catch (IOException e) {
-            logger.error(e.getMessage());
-            return;
-        } catch (ConfigException e) {
-            logger.error(e.getMessage());
-            return;
-        }
-        configRoot = root;
-    }
-
-    public ConfigurationNode getConfigFile() {
-        return configRoot;
-    }
-
-    public void saveConfigFile(ConfigurationNode root) {
-        String fileName = "config.conf";
-        ConfigurationLoader<?> manager = HoconConfigurationLoader.builder().setFile(new File("config/Updatifier/" + fileName)).build();
->>>>>>> refs/remotes/Flibio/master
-        try {
-            manager.save(root);
-        } catch (IOException e) {
-            logger.error(e.getMessage());
-        }
     }
 
 }
