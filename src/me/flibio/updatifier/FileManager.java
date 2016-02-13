@@ -40,7 +40,7 @@ public class FileManager {
 
     private final Logger logger;
     private final ConfigurationLoader<CommentedConfigurationNode> manager;
-    private final ConfigurationNode configRoot;
+    private ConfigurationNode configRoot;
 
     public FileManager(Logger logger, ConfigurationLoader<CommentedConfigurationNode> loader) {
         this.logger = logger;
@@ -48,8 +48,7 @@ public class FileManager {
         try {
             this.configRoot = this.manager.load();
         } catch (IOException e) {
-            logger.error(e.getMessage());
-            throw new RuntimeException(e);
+            this.configRoot = this.manager.createEmptyNode();
         }
     }
 
@@ -63,7 +62,7 @@ public class FileManager {
                 set(path, type, value);
             }
         } catch (ObjectMappingException e) {
-            logger.error(e.getMessage());
+            logger.error(e.getMessage(), e);
         }
     }
 
@@ -72,12 +71,12 @@ public class FileManager {
         try {
             node.setValue(TypeToken.of(type), value);
         } catch (ObjectMappingException e) {
-            logger.error(e.getMessage());
+            logger.error(e.getMessage(), e);
         }
         try {
-            manager.save(node);
+            manager.save(configRoot);
         } catch (IOException e) {
-            logger.error(e.getMessage());
+            logger.error(e.getMessage(), e);
         }
     }
 
@@ -87,7 +86,7 @@ public class FileManager {
             T value = node.getValue(TypeToken.of(type));
             return Optional.ofNullable(value);
         } catch (ObjectMappingException e) {
-            logger.error(e.getMessage());
+            logger.error(e.getMessage(), e);
         }
         return Optional.empty();
     }

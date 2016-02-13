@@ -68,16 +68,17 @@ public class UpdatifierPlugin {
     @Inject
     private SpongeStatsLite statsLite;
     private HashMap<String, String> updates = new HashMap<>();
-    private UpdatifierService api = new UpdatifierServiceImpl(this);
+    private UpdatifierService api;
     private boolean downloadUpdates = false;
     private boolean showChangelogs = false;
 
     @Listener
     public void onPreInitialize(GamePreInitializationEvent event) {
         this.statsLite.start();
+        this.api = new UpdatifierServiceImpl(this);
         this.fileManager = new FileManager(this.logger, this.defaultRoot);
-        this.downloadUpdates = this.fileManager.getOrDefault("Download-Updates", Boolean.TYPE, false);
-        this.showChangelogs = this.fileManager.getOrDefault("Show-Changelogs", Boolean.TYPE, true);
+        this.downloadUpdates = this.fileManager.getOrDefault("Download-Updates", Boolean.class, false);
+        this.showChangelogs = this.fileManager.getOrDefault("Show-Changelogs", Boolean.class, true);
     }
 
     @Listener
@@ -85,7 +86,7 @@ public class UpdatifierPlugin {
         Sponge.getPluginManager().getPlugins().forEach(pluginC -> {
             if (pluginC.getInstance().isPresent()) {
                 if (pluginC.getInstance().get().getClass().isAnnotationPresent(Updatifier.class)) {
-                    if (!this.fileManager.getOrDefault("Blocked-Plugins." + pluginC.getId(), Boolean.TYPE, false)) {
+                    if (!this.fileManager.getOrDefault("Blocked-Plugins." + pluginC.getId(), Boolean.class, false)) {
                         Updatifier info = pluginC.getInstance().get().getClass().getAnnotation(Updatifier.class);
                         Task.builder().execute(task -> {
                             boolean available = this.api.updateAvailable(info.repoOwner(), info.repoName(), info.version());
