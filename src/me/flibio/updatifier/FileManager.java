@@ -24,101 +24,81 @@
  */
 package me.flibio.updatifier;
 
+import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
+import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
-
+import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.slf4j.Logger;
 
-import com.typesafe.config.ConfigException;
-
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Optional;
 
 public class FileManager {
 
-    private Logger logger;
-    private ConfigurationNode configRoot;
+    private final Logger logger;
+    private final ConfigurationLoader<CommentedConfigurationNode> manager;
+    private final ConfigurationNode configRoot;
 
-    public FileManager(Logger logger) {
+    public FileManager(Logger logger, ConfigurationLoader<CommentedConfigurationNode> loader) {
         this.logger = logger;
-    }
-
-    public void testDefault(String path, Object value) {
-        if (configRoot != null) {
-            // Check if the configuration file doesn't contain the path
-            if (configRoot.getNode((Object[]) path.split("\\.")).getValue() == null) {
-                // Set the path to the default value
-                configRoot.getNode((Object[]) path.split("\\.")).setValue(value);
-                saveConfigFile(configRoot);
-            }
-        }
-    }
-
-    public String getConfigValue(String path) {
-        if (configRoot != null) {
-            // Check if the configuration file contains the path
-            if (configRoot.getNode((Object[]) path.split("\\.")).getValue() != null) {
-                // Get the value and return it
-                return configRoot.getNode((Object[]) path.split("\\.")).getString();
-            } else {
-                return "";
-            }
-        } else {
-            return "";
-        }
-    }
-
-    public void generateFolder(String path) {
-        File folder = new File(path);
+        this.manager = loader;
         try {
-            if (!folder.exists()) {
-                folder.mkdir();
-            }
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-        }
-    }
-
-    public void generateFile(String path) {
-        File file = new File(path);
-        try {
-            if (!file.exists()) {
-                file.createNewFile();
-            }
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-        }
-    }
-
-    public void loadConfigFile() {
-        String fileName = "config.conf";
-        ConfigurationLoader<?> manager = HoconConfigurationLoader.builder().setFile(new File("config/Updatifier/" + fileName)).build();
-        ConfigurationNode root;
-        try {
-            root = manager.load();
+            this.configRoot = this.manager.load();
         } catch (IOException e) {
             logger.error(e.getMessage());
-            return;
-        } catch (ConfigException e) {
-            logger.error(e.getMessage());
-            return;
+            throw new RuntimeException(e);
         }
-        configRoot = root;
     }
 
-    public ConfigurationNode getConfigFile() {
-        return configRoot;
+    public FileManager(Logger logger, Path path, String configName) {
+        this(logger, HoconConfigurationLoader.builder().setPath(path.toAbsolutePath().resolve(configName)).build());
     }
 
-    public void saveConfigFile(ConfigurationNode root) {
-        String fileName = "config.conf";
-        ConfigurationLoader<?> manager = HoconConfigurationLoader.builder().setFile(new File("config/Updatifier/" + fileName)).build();
+    public <T> void testDefault(String path, Class<T> type, T value) {
         try {
-            manager.save(root);
+            if (configRoot.getNode((Object[]) path.split("\\.")).getValue(TypeToken.of(type)) == null) {
+                set(path, type, value);
+            }
+        } catch (ObjectMappingException e) {
+            logger.error(e.getMessage());
+        }
+    }
+
+    public <T> void set(String path, Class<T> type, T value) {
+        ConfigurationNode node = configRoot.getNode((Object[]) path.split("\\."));
+        try {
+            node.setValue(TypeToken.of(type), value);
+        } catch (ObjectMappingException e) {
+            logger.error(e.getMessage());
+        }
+        try {
+            manager.save(node);
         } catch (IOException e) {
             logger.error(e.getMessage());
         }
+    }
+
+    public <T> Optional<T> getConfigValue(String path, Class<T> type) {
+        ConfigurationNode node = configRoot.getNode((Object[]) path.split("\\."));
+        try {
+            T value = node.getValue(TypeToken.of(type));
+            return Optional.ofNullable(value);
+        } catch (ObjectMappingException e) {
+            logger.error(e.getMessage());
+        }
+        return Optional.empty();
+    }
+
+    public <T> T getOrDefault(String path, Class<T> type, T value) {
+        Optional<T> optT = getConfigValue(path, type);
+        if (optT.isPresent()) {
+            return optT.get();
+        }
+        set(path, type, value);
+        return value;
     }
 
 }

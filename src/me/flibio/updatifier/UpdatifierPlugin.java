@@ -28,10 +28,14 @@ import static me.flibio.updatifier.PluginInfo.DEPENDENCIES;
 import static me.flibio.updatifier.PluginInfo.ID;
 import static me.flibio.updatifier.PluginInfo.NAME;
 import static me.flibio.updatifier.PluginInfo.VERSION;
-import net.minecrell.mcstats.SpongeStatsLite;
 
+import com.google.inject.Inject;
+import net.minecrell.mcstats.SpongeStatsLite;
+import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
@@ -41,8 +45,6 @@ import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
-
-import com.google.inject.Inject;
 
 import java.io.FileOutputStream;
 import java.net.URL;
@@ -54,31 +56,28 @@ import java.util.HashMap;
 @Updatifier(repoName = "Updatifier", repoOwner = "Flibio", version = "v" + VERSION)
 public class UpdatifierPlugin {
 
-    @Inject private Logger logger;
+    private FileManager fileManager;
 
-    @Inject private SpongeStatsLite statsLite;
+    @Inject
+    @DefaultConfig(sharedRoot = false)
+    private ConfigurationLoader<CommentedConfigurationNode> defaultRoot;
 
+    @Inject
+    private Logger logger;
+
+    @Inject
+    private SpongeStatsLite statsLite;
     private HashMap<String, String> updates = new HashMap<>();
-    private UpdatifierService api = new UpdatifierService();
-    private static FileManager fileManager;
+    private UpdatifierService api = new UpdatifierServiceImpl(this);
     private boolean downloadUpdates = false;
     private boolean showChangelogs = false;
 
     @Listener
     public void onPreInitialize(GamePreInitializationEvent event) {
-        // Register the Updatifier API
-        Sponge.getGame().getServiceManager().setProvider(this, UpdatifierService.class, api);
         this.statsLite.start();
-        fileManager = new FileManager(logger);
-        fileManager.generateFolder("config/Updatifier");
-        fileManager.generateFolder("updates");
-        fileManager.generateFile("config/Updatifier/config.conf");
-        fileManager.loadConfigFile();
-        fileManager.testDefault("Download-Updates", false);
-        fileManager.testDefault("Show-Changelogs", true);
-        fileManager.testDefault("Blocked-Plugins.Updatifier", false);
-        downloadUpdates = fileManager.getConfigValue("Download-Updates").contains("true");
-        showChangelogs = fileManager.getConfigValue("Show-Changelogs").contains("true");
+        this.fileManager = new FileManager(this.logger, this.defaultRoot);
+        this.downloadUpdates = this.fileManager.getOrDefault("Download-Updates", Boolean.TYPE, false);
+        this.showChangelogs = this.fileManager.getOrDefault("Show-Changelogs", Boolean.TYPE, true);
     }
 
     @Listener
@@ -86,49 +85,49 @@ public class UpdatifierPlugin {
         Sponge.getPluginManager().getPlugins().forEach(pluginC -> {
             if (pluginC.getInstance().isPresent()) {
                 if (pluginC.getInstance().get().getClass().isAnnotationPresent(Updatifier.class)) {
-                    fileManager.testDefault("Blocked-Plugins." + pluginC.getId(), false);
-                    if (!fileManager.getConfigValue("Blocked-Plugins." + pluginC.getId()).toLowerCase().contains("true")) {
+                    if (!this.fileManager.getOrDefault("Blocked-Plugins." + pluginC.getId(), Boolean.TYPE, false)) {
                         Updatifier info = pluginC.getInstance().get().getClass().getAnnotation(Updatifier.class);
                         Task.builder().execute(task -> {
-                            boolean available = api.updateAvailable(info.repoOwner(), info.repoName(), info.version());
+                            boolean available = this.api.updateAvailable(info.repoOwner(), info.repoName(), info.version());
                             if (available) {
                                 // Add the plugin to the HashMap
-                                updates.put(pluginC.getName(), info.repoOwner() + "/" + info.repoName());
+                                this.updates.put(pluginC.getName(), info.repoOwner() + "/" + info.repoName());
                                 // Log the messages on the main thread
                                 Task.builder().execute(c -> {
-                                    logger.info("An update is available for " + pluginC.getName() + "!");
-                                    if (showChangelogs) {
-                                        String body = api.getBody(info.repoOwner(), info.repoName()).replaceAll("\r", "").replaceAll("\n", "");
-                                        if (body.indexOf("<!--") != -1 || body.indexOf("-->") != -1) {
+                                    this.logger.info("An update is available for " + pluginC.getName() + "!");
+                                    if (this.showChangelogs) {
+                                        String body = this.api.getBody(info.repoOwner(), info.repoName()).replaceAll("\r", "").replaceAll("\n", "");
+                                        if (!body.contains("<!--") || !body.contains("-->")) {
                                             String result = body.substring(body.indexOf("<!--") + 4, body.indexOf("-->"));
                                             String[] changes = result.split(";");
                                             for (String change : changes) {
                                                 if (!change.trim().isEmpty()) {
-                                                    logger.info("- " + change.trim());
+                                                    this.logger.info("- " + change.trim());
                                                 }
                                             }
                                         }
                                     }
-                                    if (downloadUpdates) {
-                                        logger.info("It will be downloaded to 'updates/" + api.getFileName(info.repoOwner(), info.repoName()));
+                                    if (this.downloadUpdates) {
+                                        this.logger.info("It will be downloaded to 'updates/"
+                                                + this.api.getFileName(info.repoOwner(), info.repoName()));
                                     } else {
-                                        logger.info("Download it here: " + "https://github.com/" + info.repoOwner() + "/" + info.repoName()
+                                        this.logger.info("Download it here: " + "https://github.com/" + info.repoOwner() + "/" + info.repoName()
                                                 + "/releases");
                                     }
                                 }).submit(this);
-                                if (downloadUpdates) {
+                                if (this.downloadUpdates) {
                                     // Download the latest release asset
-                                    String url = api.getDownloadUrl(info.repoOwner(), info.repoName());
+                                    String url = this.api.getDownloadUrl(info.repoOwner(), info.repoName());
                                     if (!url.isEmpty()) {
                                         try {
                                             URL toDownload = new URL(url);
                                             ReadableByteChannel rbc = Channels.newChannel(toDownload.openStream());
                                             FileOutputStream fos = new FileOutputStream("updates/"
-                                                    + api.getFileName(info.repoOwner(), info.repoName()));
+                                                    + this.api.getFileName(info.repoOwner(), info.repoName()));
                                             fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
                                             fos.close();
                                         } catch (Exception e) {
-                                            logger.error(e.toString());
+                                            this.logger.error(e.toString());
                                         }
                                     }
                                 }
@@ -144,12 +143,13 @@ public class UpdatifierPlugin {
     public void onJoin(ClientConnectionEvent.Join event) {
         Player player = event.getTargetEntity();
         if (player.hasPermission("updatifier.notify")) {
-            for (String name : updates.keySet()) {
+            for (String name : this.updates.keySet()) {
                 player.sendMessage(Text.of(TextColors.YELLOW, "An update is available for ", TextColors.GREEN, name, "!"));
-                String repoOwner = updates.get(name).split("/")[0];
-                String repoName = updates.get(name).split("/")[1];
-                if (showChangelogs) {
-                    String body = api.getBody(repoOwner, repoName).replaceAll("\r", "").replaceAll("\n", "");
+
+                String repoOwner = this.updates.get(name).split("/")[0];
+                String repoName = this.updates.get(name).split("/")[1];
+                if (this.showChangelogs) {
+                    String body = this.api.getBody(repoOwner, repoName).replaceAll("\r", "").replaceAll("\n", "");
                     if (body.indexOf("<!--") != -1 || body.indexOf("-->") != -1) {
                         String result = body.substring(body.indexOf("<!--") + 4, body.indexOf("-->"));
                         String[] changes = result.split(";");
@@ -160,7 +160,7 @@ public class UpdatifierPlugin {
                         }
                     }
                 }
-                if (downloadUpdates) {
+                if (this.downloadUpdates) {
                     player.sendMessage(Text.of(TextColors.YELLOW, "It will be downloaded to ", TextColors.GREEN,
                             "updates/" + api.getFileName(repoOwner, repoName)));
                 } else {
