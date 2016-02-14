@@ -44,9 +44,11 @@ import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.io.FileOutputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
@@ -165,8 +167,18 @@ public class UpdatifierPlugin {
                     player.sendMessage(Text.of(TextColors.YELLOW, "It will be downloaded to ", TextColors.GREEN,
                             "updates/" + api.getFileName(repoOwner, repoName)));
                 } else {
-                    player.sendMessage(Text.of(TextColors.YELLOW, "Download it here: ", TextColors.GREEN, "https://github.com/" + repoOwner + "/"
-                            + repoName + "/releases"));
+                    String releases = "https://github.com/" + repoOwner + "/" + repoName + "/releases";
+                    Text githubReleases;
+                    try {
+                        githubReleases = Text.builder(releases)
+                            .onClick(TextActions.openUrl(new URL(releases)))
+                            .build();
+                    } catch(MalformedURLException e) {
+                        // Silently fail and send a non-clickable link
+                        githubReleases = Text.of(releases);
+                    }
+                    player.sendMessage(Text.of(TextColors.YELLOW, "Download it here: ",
+                        TextColors.GREEN, githubReleases));
                 }
             }
         }
