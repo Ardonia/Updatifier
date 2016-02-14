@@ -26,11 +26,13 @@ package me.flibio.updatifier;
 
 public class PluginInfo {
 
-    private PluginInfo() {
-    }
-
     public static final String ID = "Updatifier";
     public static final String NAME = "Updatifier";
     public static final String VERSION = "@project.version@";
     public static final String DEPENDENCIES = "";
+    public static final String PERM_NOTIFY = "updatifier.notify";
+
+    private PluginInfo() {
+    }
+
 }

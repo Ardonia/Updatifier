@@ -27,9 +27,12 @@ package me.flibio.updatifier;
 import static me.flibio.updatifier.PluginInfo.DEPENDENCIES;
 import static me.flibio.updatifier.PluginInfo.ID;
 import static me.flibio.updatifier.PluginInfo.NAME;
+import static me.flibio.updatifier.PluginInfo.PERM_NOTIFY;
 import static me.flibio.updatifier.PluginInfo.VERSION;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
+import me.flibio.updatifier.command.UpdatifierCommands;
 import net.minecrell.mcstats.SpongeStatsLite;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
@@ -53,20 +56,19 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.HashMap;
+import java.util.Map;
 
 @Plugin(id = ID, name = NAME, version = VERSION, dependencies = DEPENDENCIES)
 @Updatifier(repoName = "Updatifier", repoOwner = "Flibio", version = "v" + VERSION)
 public class UpdatifierPlugin {
 
+    private static UpdatifierPlugin instance;
     private FileManager fileManager;
-
     @Inject
     @DefaultConfig(sharedRoot = false)
     private ConfigurationLoader<CommentedConfigurationNode> defaultRoot;
-
     @Inject
     private Logger logger;
-
     @Inject
     private SpongeStatsLite statsLite;
     private HashMap<String, String> updates = new HashMap<>();
@@ -74,8 +76,29 @@ public class UpdatifierPlugin {
     private boolean downloadUpdates = false;
     private boolean showChangelogs = false;
 
+    public static UpdatifierPlugin getInstance() {
+        return instance;
+    }
+
+    public Logger getLogger() {
+        return this.logger;
+    }
+
+    public boolean downloadUpdates() {
+        return this.downloadUpdates;
+    }
+
+    public boolean showChangelogs() {
+        return this.showChangelogs;
+    }
+
+    public Map<String, String> getUpdates() {
+        return ImmutableMap.copyOf(this.updates);
+    }
+
     @Listener
     public void onPreInitialize(GamePreInitializationEvent event) {
+        instance = this;
         this.statsLite.start();
         this.api = new UpdatifierServiceImpl(this);
         this.fileManager = new FileManager(this.logger, this.defaultRoot);
@@ -85,6 +108,8 @@ public class UpdatifierPlugin {
 
     @Listener
     public void started(GameStartedServerEvent event) {
+        UpdatifierCommands.getInstance().init();
+        UpdatifierCommands.getInstance().registerAll();
         Sponge.getPluginManager().getPlugins().forEach(pluginC -> {
             if (pluginC.getInstance().isPresent()) {
                 if (pluginC.getInstance().get().getClass().isAnnotationPresent(Updatifier.class)) {
@@ -100,7 +125,7 @@ public class UpdatifierPlugin {
                                     this.logger.info("An update is available for " + pluginC.getName() + "!");
                                     if (this.showChangelogs) {
                                         String body = this.api.getBody(info.repoOwner(), info.repoName()).replaceAll("\r", "").replaceAll("\n", "");
-                                        if (!body.contains("<!--") || !body.contains("-->")) {
+                                        if (body.contains("<!--") && body.contains("-->")) {
                                             String result = body.substring(body.indexOf("<!--") + 4, body.indexOf("-->"));
                                             String[] changes = result.split(";");
                                             for (String change : changes) {
@@ -145,7 +170,7 @@ public class UpdatifierPlugin {
     @Listener
     public void onJoin(ClientConnectionEvent.Join event) {
         Player player = event.getTargetEntity();
-        if (player.hasPermission("updatifier.notify")) {
+        if (player.hasPermission(PERM_NOTIFY)) {
             for (String name : this.updates.keySet()) {
                 player.sendMessage(Text.of(TextColors.YELLOW, "An update is available for ", TextColors.GREEN, name, "!"));
 
@@ -153,7 +178,7 @@ public class UpdatifierPlugin {
                 String repoName = this.updates.get(name).split("/")[1];
                 if (this.showChangelogs) {
                     String body = this.api.getBody(repoOwner, repoName).replaceAll("\r", "").replaceAll("\n", "");
-                    if (body.indexOf("<!--") != -1 || body.indexOf("-->") != -1) {
+                    if (body.contains("<!--") && body.contains("-->")) {
                         String result = body.substring(body.indexOf("<!--") + 4, body.indexOf("-->"));
                         String[] changes = result.split(";");
                         for (String change : changes) {
@@ -171,14 +196,14 @@ public class UpdatifierPlugin {
                     Text githubReleases;
                     try {
                         githubReleases = Text.builder(releases)
-                            .onClick(TextActions.openUrl(new URL(releases)))
-                            .build();
-                    } catch(MalformedURLException e) {
+                                .onClick(TextActions.openUrl(new URL(releases)))
+                                .build();
+                    } catch (MalformedURLException e) {
                         // Silently fail and send a non-clickable link
                         githubReleases = Text.of(releases);
                     }
                     player.sendMessage(Text.of(TextColors.YELLOW, "Download it here: ",
-                        TextColors.GREEN, githubReleases));
+                            TextColors.GREEN, githubReleases));
                 }
             }
         }
