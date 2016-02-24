@@ -26,17 +26,10 @@ package me.flibio.updatifier.command;
 
 import me.flibio.updatifier.PluginInfo;
 import me.flibio.updatifier.UpdatifierPlugin;
+
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.action.TextActions;
-import org.spongepowered.api.text.format.TextColors;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Utility command class for Updatifier plugin.

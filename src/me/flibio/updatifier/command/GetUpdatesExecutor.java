@@ -42,11 +42,6 @@ import org.spongepowered.api.text.format.TextColors;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-/**
- * Created by liach on 2/16/2016.
- *
- * @author liach
- */
 public class GetUpdatesExecutor implements CommandExecutor {
 
     private static final GetUpdatesExecutor INSTANCE = new GetUpdatesExecutor();
@@ -77,7 +72,6 @@ public class GetUpdatesExecutor implements CommandExecutor {
         UpdatifierService api = UpdatifierService.getInstance();
         pluginInstance.getUpdates().entrySet().forEach(entry -> {
             String name = entry.getKey();
-            String repo = "https://github.com/" + entry.getValue();
             player.sendMessage(Text.of(TextColors.YELLOW, "An update is available for ", TextColors.GREEN, name, "!"));
 
             String repoOwner = entry.getValue().split("/")[0];

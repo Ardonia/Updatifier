@@ -56,6 +56,7 @@ public class UpdatifierServiceImpl extends UpdatifierService {
         if (lReleaseData == null || tReleaseData == null || lReleaseData.publishedAt() == null || tReleaseData.publishedAt() == null) {
             return false;
         }
+        releases.put(repoOwner + "/" + repoName, lReleaseData);
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss");
         String latestTime = lReleaseData.publishedAt();
         String taggedTime = tReleaseData.publishedAt();
