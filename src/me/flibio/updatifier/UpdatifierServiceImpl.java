@@ -1,7 +1,7 @@
 /**
  * This file is part of Updatifier, licensed under the MIT License (MIT).
  *
- * Copyright (c) 2016 - 2016 Flibio <http://github.com/Flibio>
+ * Copyright (c) 2016 - 2016 FlibioStudio <http://github.com/FlibioStudio>
  * Copyright (c) Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -22,24 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package me.flibio.updatifier;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.spongepowered.api.Sponge;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 
-public class UpdatifierServiceImpl extends UpdatifierService {
+public class UpdatifierServiceImpl implements UpdatifierService {
 
     protected HashMap<String, ReleaseData> releases = new HashMap<>();
 
-    protected UpdatifierServiceImpl(UpdatifierPlugin plugin) {
-        super(plugin);
+    UpdatifierServiceImpl(UpdatifierPlugin plugin) {
+        Sponge.getServiceManager().setProvider(plugin, UpdatifierService.class, this);
     }
 
+    @Override
     public boolean updateAvailable(String repoOwner, String repoName, String currentVersion) {
         String latestRelease = HttpUtils.requestData("https://api.github.com/repos/" + repoOwner + "/" + repoName + "/releases/latest");
         String taggedRelease = HttpUtils.requestData("https://api.github.com/repos/" + repoOwner + "/" + repoName + "/releases/tags/"
@@ -78,6 +81,7 @@ public class UpdatifierServiceImpl extends UpdatifierService {
      * @param repoName The name of the repository
      * @return The download URL of the latest release
      */
+    @Override
     public String getDownloadUrl(String repoOwner, String repoName) {
         if (!releases.containsKey(repoOwner + "/" + repoName)) {
             return "";
@@ -97,6 +101,7 @@ public class UpdatifierServiceImpl extends UpdatifierService {
      * @param repoName The name of the repository
      * @return The file name of the latest release
      */
+    @Override
     public String getFileName(String repoOwner, String repoName) {
         if (!releases.containsKey(repoOwner + "/" + repoName)) {
             return "";
@@ -115,6 +120,7 @@ public class UpdatifierServiceImpl extends UpdatifierService {
      * @param repoName The name of the repository
      * @return The tag of the latest release
      */
+    @Override
     public String getTag(String repoOwner, String repoName) {
         if (!releases.containsKey(repoOwner + "/" + repoName)) {
             return "";
@@ -130,6 +136,7 @@ public class UpdatifierServiceImpl extends UpdatifierService {
      * @param repoName The name of the repository
      * @return The body of the latest release
      */
+    @Override
     public String getBody(String repoOwner, String repoName) {
         if (!releases.containsKey(repoOwner + "/" + repoName)) {
             return "";

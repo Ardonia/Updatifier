@@ -1,89 +1,139 @@
 plugins {
-  id 'java'
-  id 'maven'
-  id 'com.github.hierynomus.license' version '0.12.1'
-  id 'net.ellune.blossom' version '1.0.1'
+    id 'java'
+    id 'maven'
+    id "org.spongepowered.plugin" version "0.5.1"
+    id 'net.minecrell.licenser' version '0.1.3'
+    id 'net.ellune.blossom' version '1.0.1'
 }
 
-defaultTasks 'licenseFormat', 'clean', 'build'
+repositories {
+    mavenCentral()
+    jcenter()
+    maven {
+        name 'Sponge maven repo'
+        url 'http://repo.spongepowered.org/maven'
+    }
+    maven {
+        name = 'minecrell-releases'
+        url = 'http://repo.minecrell.net/releases'
+    }
+}
+
+defaultTasks 'clean', 'build'
 
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
+ext {
+    pluginPackage = "${project.id}"
+    pluginClass = "${pluginPackage}.UpdatifierPlugin"
+}
+
+sponge.plugin.id = project.id
+
 blossom {
     replaceToken '@project.version@', project.version, 'src/me/flibio/updatifier/PluginInfo.java'
+    replaceToken '@project.id@', project.id, 'src/me/flibio/updatifier/PluginInfo.java'
+    replaceToken '@project.name@', project.name, 'src/me/flibio/updatifier/PluginInfo.java'
+    replaceToken '@project.description@', project.description, 'src/me/flibio/updatifier/PluginInfo.java'
 }
 
 archivesBaseName = project.name
 version = "v${project.version}-r${project.apiVersion.split("-")[0]}"
 
-repositories {
-  mavenCentral()
-  jcenter()
-  maven {
-    name 'Sponge maven repo'
-    url 'http://repo.spongepowered.org/maven'
-  }
-  maven {
-    name = 'minecrell-releases'
-    url = 'http://repo.minecrell.net/releases'
-  }
-}
-
 configurations {
-  shade
-  compile.extendsFrom shade
+    shade
+    compile.extendsFrom shade
 }
 
 sourceSets {
-  api.java.srcDir 'api'
-  main {
-    java.srcDir 'src'
-    compileClasspath += api.output
-  }
+    api.java.srcDir 'api'
+    main {
+        java.srcDir 'src'
+        compileClasspath += api.output
+    }
 }
 
 dependencies {
-  compile "org.spongepowered:spongeapi:${project.apiVersion}"
-  apiCompile "org.spongepowered:spongeapi:${project.apiVersion}"
-  shade 'net.minecrell.mcstats:statslite-sponge:0.2.1'
+    compile "org.spongepowered:spongeapi:${project.apiVersion}"
+    apiCompile "org.spongepowered:spongeapi:${project.apiVersion}"
+    shade 'net.minecrell.mcstats:statslite-sponge:0.2.2'
+}
+
+task apiJavadoc(type: Javadoc) {
+    options.links (
+        'http://www.slf4j.org/apidocs/',
+        'http://docs.guava-libraries.googlecode.com/git-history/v17.0/javadoc/',
+        'http://google.github.io/guice/api-docs/latest/javadoc/',
+        'http://zml2008.github.io/configurate/configurate-core/apidocs/',
+        'http://zml2008.github.io/configurate/configurate-hocon/apidocs/',
+        'http://flowpowered.com/math/',
+        'http://flowpowered.com/noise/',
+        'http://asm.ow2.org/asm50/javadoc/user/',
+        'https://docs.oracle.com/javase/8/docs/api/',
+        "https://jd.spongepowered.org/${project.apiVersion}/"
+    )
+    setSource sourceSets.api.allJava
+    classpath = sourceSets.api.compileClasspath
+}
+
+task apiJavadocJar(type: Jar, dependsOn: apiJavadoc) {
+    classifier = "api-javadoc"
+    from apiJavadoc.destinationDir
 }
 
 task apiJar(type: Jar) {
-  classifier = 'api'
-  from sourceSets.api.output
+    classifier = 'api'
+    from sourceSets.api.output
+}
+
+task apiSourceJar(type: Jar) {
+    classifier = 'api-sources'
+    from sourceSets.api.allSource
+}
+
+task sourceJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.api.allSource
+    from sourceSets.main.allSource
 }
 
 jar {
-  from sourceSets.api.output
-  from sourceSets.main.output
-  configurations.shade.copyRecursive().setTransitive(false).each { artifact ->
-    from (zipTree(artifact))
-  }
+    from sourceSets.api.output
+    from sourceSets.main.output
+    configurations.shade.copyRecursive().setTransitive(false).each {artifact ->
+        from(zipTree(artifact))
+    }
 }
 
 license {
-  ext.name = project.name
-  ext.organization = project.organization
-  ext.url = project.url
-  ext.inceptionYear = project.inceptionYear
-  ext.currentYear = project.currentYear
-  header rootProject.file('HEADER.txt')
-  ignoreFailures true
-  strictCheck true
-  include '**/*.java'
+    ext.name = project.name
+    ext.organization = project.organization
+    ext.url = project.url
+    ext.inceptionYear = project.inceptionYear
+    ext.currentYear = project.currentYear
+    header rootProject.file('HEADER.txt')
+    include '**/*.java'
+    style.java = 'JAVADOC'
 }
 
-build.dependsOn apiJar
+build.dependsOn checkLicenses
 
 artifacts {
-  archives apiJar
+    archives apiJar
+    archives apiSourceJar
+    archives apiJavadocJar
+    archives sourceJar
 }
 
 task wrapper(type: Wrapper) {
-  gradleVersion = '2.11'
+    gradleVersion = '2.11'
 }
 
 tasks.withType(Javadoc) {
-  options.addStringOption('Xdoclint:none', '-quiet')
+    options {
+        encoding = 'UTF-8'
+        charSet = 'UTF-8'
+        addStringOption('Xdoclint:none', '-quiet')
+    }
 }

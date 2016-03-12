@@ -1,7 +1,7 @@
 /**
  * This file is part of Updatifier, licensed under the MIT License (MIT).
  *
- * Copyright (c) 2016 - 2016 Flibio <http://github.com/Flibio>
+ * Copyright (c) 2016 - 2016 FlibioStudio <http://github.com/FlibioStudio>
  * Copyright (c) Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -22,9 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package me.flibio.updatifier;
 
-import static me.flibio.updatifier.PluginInfo.DEPENDENCIES;
+import static me.flibio.updatifier.PluginInfo.DESCRIPTION;
 import static me.flibio.updatifier.PluginInfo.ID;
 import static me.flibio.updatifier.PluginInfo.NAME;
 import static me.flibio.updatifier.PluginInfo.PERM_NOTIFY;
@@ -58,8 +59,8 @@ import java.nio.channels.ReadableByteChannel;
 import java.util.HashMap;
 import java.util.Map;
 
-@Plugin(id = ID, name = NAME, version = VERSION, dependencies = DEPENDENCIES)
-@Updatifier(repoName = "Updatifier", repoOwner = "Flibio", version = "v" + VERSION)
+@Plugin(id = ID, name = NAME, version = VERSION, dependencies = {}, description = DESCRIPTION)
+@Updatifier(repoName = "Updatifier", repoOwner = "FlibioStudio", version = "v" + VERSION)
 public class UpdatifierPlugin {
 
     private static UpdatifierPlugin instance;
@@ -75,6 +76,11 @@ public class UpdatifierPlugin {
     private UpdatifierService api;
     private boolean downloadUpdates = false;
     private boolean showChangelogs = false;
+
+    @Inject
+    private UpdatifierPlugin() {
+        instance = this;
+    }
 
     public static UpdatifierPlugin getInstance() {
         return instance;
@@ -98,7 +104,6 @@ public class UpdatifierPlugin {
 
     @Listener
     public void onPreInitialize(GamePreInitializationEvent event) {
-        instance = this;
         this.statsLite.start();
         this.api = new UpdatifierServiceImpl(this);
         this.fileManager = new FileManager(this.logger, this.defaultRoot);

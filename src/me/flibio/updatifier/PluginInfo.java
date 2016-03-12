@@ -1,7 +1,7 @@
 /**
  * This file is part of Updatifier, licensed under the MIT License (MIT).
  *
- * Copyright (c) 2016 - 2016 Flibio <http://github.com/Flibio>
+ * Copyright (c) 2016 - 2016 FlibioStudio <http://github.com/FlibioStudio>
  * Copyright (c) Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -22,15 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package me.flibio.updatifier;
 
 public class PluginInfo {
 
-    public static final String ID = "Updatifier";
-    public static final String NAME = "Updatifier";
+    public static final String ID = "@project.id@";
+    public static final String NAME = "@project.name@";
     public static final String VERSION = "@project.version@";
-    public static final String DEPENDENCIES = "";
     public static final String PERM_NOTIFY = "updatifier.notify";
+    public static final String DESCRIPTION = "@project.description@";
 
     private PluginInfo() {
     }

@@ -1,7 +1,7 @@
 /**
  * This file is part of Updatifier, licensed under the MIT License (MIT).
  *
- * Copyright (c) 2016 - 2016 Flibio <http://github.com/Flibio>
+ * Copyright (c) 2016 - 2016 FlibioStudio <http://github.com/FlibioStudio>
  * Copyright (c) Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -22,55 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package me.flibio.updatifier;
 
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.service.ProvisioningException;
 
-public abstract class UpdatifierService {
+/**
+ * The Updatfier service, providing utilities for checking updates from GitHub
+ * releases.
+ */
+public interface UpdatifierService {
 
-    protected static UpdatifierService instance = new UpdatifierService() {
-        @Override
-        public boolean updateAvailable(String repoOwner, String repoName, String currentVersion) {
-            return false;
-        }
-
-        @Override
-        public String getDownloadUrl(String repoOwner, String repoName) {
-            return "";
-        }
-
-        @Override
-        public String getFileName(String repoOwner, String repoName) {
-            return "";
-        }
-
-        @Override
-        public String getTag(String repoOwner, String repoName) {
-            return "";
-        }
-
-        @Override
-        public String getBody(String repoOwner, String repoName) {
-            return "";
-        }
-    };
-
-    private UpdatifierService() {
-        instance = this;
-    }
-
-    protected UpdatifierService(Object plugin) {
-        this();
-        Sponge.getGame().getServiceManager().setProvider(plugin, UpdatifierService.class, this);
+    /**
+     * Gets the instance of {@link UpdatifierService} stored in {@link Sponge}'s
+     * service manager. Please use {@link #isAvailable()} to check whether such
+     * an instance exists.
+     *
+     * @throws ProvisioningException If the service is not available
+     * @return The instance of {@link UpdatifierService}
+     */
+    static UpdatifierService getInstance() throws ProvisioningException {
+        return Sponge.getServiceManager().provideUnchecked(UpdatifierService.class);
     }
 
     /**
-     * Gets the instance of {@link UpdatifierService}.
+     * Checks whether the {@link UpdatifierService} is available.
      *
-     * @return The instance of {@link UpdatifierService}
+     * @return {@code true} if the service is available
      */
-    public static UpdatifierService getInstance() {
-        return UpdatifierService.instance;
+    static boolean isAvailable() {
+        return Sponge.getServiceManager().provide(UpdatifierService.class).isPresent();
     }
 
     /**
