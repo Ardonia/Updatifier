@@ -2,10 +2,10 @@ plugins {
     id 'java'
     id 'maven'
     id 'org.spongepowered.plugin' version '0.5.1'
-    id 'net.minecrell.licenser' version '0.1.3'
-    id 'net.ellune.blossom' version '1.0.1'
+    id 'net.minecrell.licenser' version '0.1.5'
+    id 'ninja.miserable.blossom' version '1.0.1'
     id 'com.github.johnrengelman.shadow' version '1.2.3'
-    id 'com.qixalite.spongestart' version '1.4.2'
+    id 'com.qixalite.spongestart' version '1.4.3'
 }
 
 repositories {
@@ -51,12 +51,15 @@ sourceSets {
     }
 }
 
-configurations.compile.extendsFrom configurations.shadow
+configurations {
+    include
+    compile.extendsFrom include
+}
 
 dependencies {
     compile "org.spongepowered:spongeapi:${project.apiVersion}"
     apiCompile "org.spongepowered:spongeapi:${project.apiVersion}"
-    shadow 'net.minecrell.mcstats:statslite-sponge:0.2.2'
+    include 'net.minecrell.mcstats:statslite-sponge:0.2.2'
 }
 
 task apiJavadoc(type: Javadoc) {
@@ -98,7 +101,7 @@ task sourceJar(type: Jar) {
 }
 
 task pluginJar(type: com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
-    configurations = [project.configurations.shadow]
+    configurations = [project.configurations.include]
     classifier = ''
     from sourceSets.api.output
     from sourceSets.main.output
