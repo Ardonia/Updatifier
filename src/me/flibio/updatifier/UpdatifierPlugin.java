@@ -46,6 +46,7 @@ import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
@@ -58,6 +59,7 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Plugin(id = ID, name = NAME, version = VERSION, dependencies = {}, description = DESCRIPTION)
 @Updatifier(repoName = "Updatifier", repoOwner = "FlibioStudio", version = "v" + VERSION)
@@ -115,61 +117,78 @@ public class UpdatifierPlugin {
     public void started(GameStartedServerEvent event) {
         UpdatifierCommands.getInstance().init();
         UpdatifierCommands.getInstance().registerAll();
+        checkUpdates();
+    }
+
+    public void checkUpdates() {
         Sponge.getPluginManager().getPlugins().forEach(pluginC -> {
-            if (pluginC.getInstance().isPresent()) {
-                if (pluginC.getInstance().get().getClass().isAnnotationPresent(Updatifier.class)) {
-                    if (!this.fileManager.getOrDefault("Blocked-Plugins." + pluginC.getId(), Boolean.class, false)) {
-                        Updatifier info = pluginC.getInstance().get().getClass().getAnnotation(Updatifier.class);
-                        Task.builder().execute(task -> {
-                            boolean available = this.api.updateAvailable(info.repoOwner(), info.repoName(), info.version());
-                            if (available) {
-                                // Add the plugin to the HashMap
-                                this.updates.put(pluginC.getName(), info.repoOwner() + "/" + info.repoName());
-                                // Log the messages on the main thread
-                                Task.builder().execute(c -> {
-                                    this.logger.info("An update is available for " + pluginC.getName() + "!");
-                                    if (this.showChangelogs) {
-                                        String body = this.api.getBody(info.repoOwner(), info.repoName()).replaceAll("\r", "").replaceAll("\n", "");
-                                        if (body.contains("<!--") && body.contains("-->")) {
-                                            String result = body.substring(body.indexOf("<!--") + 4, body.indexOf("-->"));
-                                            String[] changes = result.split(";");
-                                            for (String change : changes) {
-                                                if (!change.trim().isEmpty()) {
-                                                    this.logger.info("- " + change.trim());
-                                                }
-                                            }
-                                        }
-                                    }
-                                    if (this.downloadUpdates) {
-                                        this.logger.info("It will be downloaded to 'updates/"
-                                                + this.api.getFileName(info.repoOwner(), info.repoName()));
-                                    } else {
-                                        this.logger.info("Download it here: " + "https://github.com/" + info.repoOwner() + "/" + info.repoName()
-                                                + "/releases");
-                                    }
-                                }).submit(this);
-                                if (this.downloadUpdates) {
-                                    // Download the latest release asset
-                                    String url = this.api.getDownloadUrl(info.repoOwner(), info.repoName());
-                                    if (!url.isEmpty()) {
-                                        try {
-                                            URL toDownload = new URL(url);
-                                            ReadableByteChannel rbc = Channels.newChannel(toDownload.openStream());
-                                            FileOutputStream fos = new FileOutputStream("updates/"
-                                                    + this.api.getFileName(info.repoOwner(), info.repoName()));
-                                            fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-                                            fos.close();
-                                        } catch (Exception e) {
-                                            this.logger.error(e.toString());
-                                        }
-                                    }
-                                }
-                            }
-                        }).async().submit(this);
+            if (!this.fileManager.getOrDefault("Blocked-Plugins." + pluginC.getId(), Boolean.class, false)) {
+                Optional<?> pluginInstance = pluginC.getInstance();
+                if (pluginInstance.isPresent()) {
+                    Class<?> pluginClass = pluginInstance.get().getClass();
+                    boolean hasFound = false;
+                    if (pluginClass.isAnnotationPresent(Updatifier.class)) {
+                        checkUpdatifier(pluginC, pluginClass.getAnnotation(Updatifier.class));
+                    }
+                    if (pluginClass.isAnnotationPresent(Maven.class)) {
+                        checkUpdatifier(pluginC, pluginClass.getAnnotation(Updatifier.class));
                     }
                 }
             }
         });
+    }
+
+    private void checkMaven(PluginContainer pluginContainer, Maven info) {
+
+    }
+
+    private void checkUpdatifier(PluginContainer pluginC, Updatifier info) {
+        Task.builder().execute(task -> {
+            boolean available = this.api.updateAvailable(info.repoOwner(), info.repoName(), info.version());
+            if (available) {
+                // Add the plugin to the HashMap
+                this.updates.put(pluginC.getName(), info.repoOwner() + "/" + info.repoName());
+                // Log the messages on the main thread
+                Task.builder().execute(c -> {
+                    this.logger.info("An update is available for " + pluginC.getName() + "!");
+                    if (this.showChangelogs) {
+                        String body = this.api.getBody(info.repoOwner(), info.repoName()).replaceAll("\r", "").replaceAll("\n", "");
+                        if (body.contains("<!--") && body.contains("-->")) {
+                            String result = body.substring(body.indexOf("<!--") + 4, body.indexOf("-->"));
+                            String[] changes = result.split(";");
+                            for (String change : changes) {
+                                if (!change.trim().isEmpty()) {
+                                    this.logger.info("- " + change.trim());
+                                }
+                            }
+                        }
+                    }
+                    if (this.downloadUpdates) {
+                        this.logger.info("It will be downloaded to 'updates/"
+                                + this.api.getFileName(info.repoOwner(), info.repoName()));
+                    } else {
+                        this.logger.info("Download it here: " + "https://github.com/" + info.repoOwner() + "/" + info.repoName()
+                                + "/releases");
+                    }
+                }).submit(this);
+                if (this.downloadUpdates) {
+                    // Download the latest release asset
+                    String url = this.api.getDownloadUrl(info.repoOwner(), info.repoName());
+                    if (!url.isEmpty()) {
+                        try {
+                            URL toDownload = new URL(url);
+                            ReadableByteChannel rbc = Channels.newChannel(toDownload.openStream());
+                            FileOutputStream fos = new FileOutputStream("updates/"
+                                    + this.api.getFileName(info.repoOwner(), info.repoName()));
+                            fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+                            fos.close();
+                        } catch (Exception e) {
+                            this.logger.error(e.toString());
+                        }
+                    }
+                }
+            }
+        }).async().submit(this);
     }
 
     @Listener

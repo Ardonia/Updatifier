@@ -27,15 +27,11 @@ package me.flibio.updatifier.command;
 
 import me.flibio.updatifier.UpdatifierPlugin;
 import me.flibio.updatifier.UpdatifierService;
-import org.slf4j.Logger;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.command.spec.CommandExecutor;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
@@ -57,23 +53,10 @@ public class GetUpdatesExecutor implements CommandExecutor {
 
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-        if (src instanceof Player) {
-            handlePlayer((Player) src);
-            return CommandResult.success();
-        }
-        if (src instanceof ConsoleSource) {
-            handleConsole();
-            return CommandResult.success();
-        }
-
-        return CommandResult.empty();
-    }
-
-    private void handlePlayer(Player player) {
         UpdatifierService api = UpdatifierService.getInstance();
         pluginInstance.getUpdates().entrySet().forEach(entry -> {
             String name = entry.getKey();
-            player.sendMessage(Text.of(TextColors.YELLOW, "An update is available for ", TextColors.GREEN, name, "!"));
+            src.sendMessage(Text.of(TextColors.YELLOW, "An update is available for ", TextColors.GREEN, name, "!"));
 
             String repoOwner = entry.getValue().split("/")[0];
             String repoName = entry.getValue().split("/")[1];
@@ -84,13 +67,13 @@ public class GetUpdatesExecutor implements CommandExecutor {
                     String[] changes = result.split(";");
                     for (String change : changes) {
                         if (!change.trim().isEmpty()) {
-                            player.sendMessage(Text.of(TextColors.YELLOW, "- ", TextColors.GRAY, change.trim()));
+                            src.sendMessage(Text.of(TextColors.YELLOW, "- ", TextColors.GRAY, change.trim()));
                         }
                     }
                 }
             }
             if (pluginInstance.downloadUpdates()) {
-                player.sendMessage(Text.of(TextColors.YELLOW, "It will be downloaded to ", TextColors.GREEN,
+                src.sendMessage(Text.of(TextColors.YELLOW, "It will be downloaded to ", TextColors.GREEN,
                         "updates/" + api.getFileName(repoOwner, repoName)));
             } else {
                 Text text;
@@ -102,49 +85,13 @@ public class GetUpdatesExecutor implements CommandExecutor {
                     text = Text.of(TextColors.GREEN,
                             "https://github.com/" + repoOwner + "/" + repoName + "/releases");
                 }
-                player.sendMessage(Text.of(TextColors.YELLOW, "Download it here: ", text));
+                src.sendMessage(Text.of(TextColors.YELLOW, "Download it here: ", text));
             }
         });
         if (pluginInstance.getUpdates().isEmpty()) {
-            player.sendMessage(Text.of("All plugins are latest, you are good now!"));
+            src.sendMessage(Text.of("All plugins are latest, you are good now!"));
         }
-    }
-
-    private void handleConsole() {
-        Logger logger = pluginInstance.getLogger();
-        pluginInstance.getUpdates().entrySet().forEach(entry -> {
-            Task.builder().execute(task -> {
-                String name = entry.getKey();
-                logger.info("An update is available for " + name + "!");
-
-                String repoOwner = entry.getValue().split("/")[0];
-                String repoName = entry.getValue().split("/")[1];
-                if (pluginInstance.showChangelogs()) {
-                    String body = UpdatifierService.getInstance().getBody(repoOwner, repoName).replaceAll("\r", "").replaceAll("\n", "");
-                    if (body.contains("<!--") && body.contains("-->")) {
-                        String result = body.substring(body.indexOf("<!--") + 4, body.indexOf("-->"));
-                        String[] changes = result.split(";");
-                        for (String change : changes) {
-                            if (!change.trim().isEmpty()) {
-                                logger.info("- " + change.trim());
-                            }
-                        }
-                    }
-                }
-                if (pluginInstance.downloadUpdates()) {
-                    logger.info("It will be downloaded to 'updates/"
-                            + UpdatifierService.getInstance().getFileName(repoOwner, repoName));
-                } else {
-                    logger.info("Download it here: " + "https://github.com/" + repoOwner + "/" + repoName
-                            + "/releases");
-                }
-            }).submit(pluginInstance);
-        });
-        if (pluginInstance.getUpdates().isEmpty()) {
-            Task.builder().execute(task -> {
-                logger.info("All plugins are latest, you are good now!");
-            }).submit(pluginInstance);
-        }
+        return CommandResult.success();
     }
 
 }

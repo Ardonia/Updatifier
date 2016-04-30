@@ -60,6 +60,7 @@ dependencies {
     compile "org.spongepowered:spongeapi:${project.apiVersion}"
     apiCompile "org.spongepowered:spongeapi:${project.apiVersion}"
     include 'net.minecrell.mcstats:statslite-sponge:0.2.2'
+    include 'org.apache.maven:maven-repository-metadata:3.3.9'
 }
 
 task apiJavadoc(type: Javadoc) {

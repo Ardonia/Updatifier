@@ -67,6 +67,7 @@ public interface UpdatifierService {
      *        The current plugin version to check against the latest release tag
      * @return If an update is available or not
      */
+    @Deprecated
     public abstract boolean updateAvailable(String repoOwner, String repoName, String currentVersion);
 
     /**
@@ -77,6 +78,7 @@ public interface UpdatifierService {
      * @param repoName The name of the repository
      * @return The download URL of the latest release
      */
+    @Deprecated
     public abstract String getDownloadUrl(String repoOwner, String repoName);
 
     /**
@@ -87,6 +89,7 @@ public interface UpdatifierService {
      * @param repoName The name of the repository
      * @return The file name of the latest release
      */
+    @Deprecated
     public abstract String getFileName(String repoOwner, String repoName);
 
     /**
@@ -96,6 +99,7 @@ public interface UpdatifierService {
      * @param repoName The name of the repository
      * @return The tag of the latest release
      */
+    @Deprecated
     public abstract String getTag(String repoOwner, String repoName);
 
     /**
@@ -105,6 +109,7 @@ public interface UpdatifierService {
      * @param repoName The name of the repository
      * @return The body of the latest release
      */
+    @Deprecated
     public abstract String getBody(String repoOwner, String repoName);
 
 }
