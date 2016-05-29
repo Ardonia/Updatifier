@@ -32,10 +32,10 @@ ext {
 sponge.plugin.id = project.id
 
 blossom {
-    replaceToken '@project.version@', project.version, 'src/me/flibio/updatifier/PluginInfo.java'
-    replaceToken '@project.id@', project.id, 'src/me/flibio/updatifier/PluginInfo.java'
-    replaceToken '@project.name@', project.name, 'src/me/flibio/updatifier/PluginInfo.java'
-    replaceToken '@project.description@', project.description, 'src/me/flibio/updatifier/PluginInfo.java'
+    replaceToken '@project.version@', project.version, 'src/main/java/me/flibio/updatifier/PluginInfo.java'
+    replaceToken '@project.id@', project.id, 'src/main/java/me/flibio/updatifier/PluginInfo.java'
+    replaceToken '@project.name@', project.name, 'src/main/java/me/flibio/updatifier/PluginInfo.java'
+    replaceToken '@project.description@', project.description, 'src/main/java/me/flibio/updatifier/PluginInfo.java'
 }
 
 archivesBaseName = project.name
@@ -47,9 +47,9 @@ configurations {
 }
 
 sourceSets {
-    api.java.srcDir 'api'
+    api.java.srcDir 'api/src/main'
     main {
-        java.srcDir 'src'
+        java.srcDir 'src.main'
         compileClasspath += api.output
     }
 }
