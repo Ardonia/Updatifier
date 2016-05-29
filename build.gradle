@@ -47,9 +47,8 @@ configurations {
 }
 
 sourceSets {
-    api.java.srcDir 'api/src/main'
+    api.java.srcDir 'api/src/main/java'
     main {
-        java.srcDir 'src.main'
         compileClasspath += api.output
     }
 }
@@ -114,6 +113,7 @@ license {
     ext.currentYear = project.currentYear
     header rootProject.file('HEADER.txt')
     include '**/*.java'
+    style.java = 'BLOCK_COMMENT'
 }
 
 build.dependsOn checkLicenses
