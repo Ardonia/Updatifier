@@ -25,6 +25,7 @@
 
 package me.flibio.updatifier.command;
 
+import com.google.inject.Inject;
 import me.flibio.updatifier.UpdatifierPlugin;
 import me.flibio.updatifier.UpdatifierService;
 import org.slf4j.Logger;
@@ -45,14 +46,11 @@ import java.net.URL;
 
 public class GetUpdatesExecutor implements CommandExecutor {
 
-    private static final GetUpdatesExecutor INSTANCE = new GetUpdatesExecutor();
-    private static final UpdatifierPlugin pluginInstance = UpdatifierPlugin.getInstance();
+    private final UpdatifierPlugin plugin;
 
-    private GetUpdatesExecutor() {
-    }
-
-    public static GetUpdatesExecutor getInstance() {
-        return GetUpdatesExecutor.INSTANCE;
+    @Inject
+    private GetUpdatesExecutor(UpdatifierPlugin plugin) {
+        this.plugin = plugin;
     }
 
     @Override
@@ -71,13 +69,13 @@ public class GetUpdatesExecutor implements CommandExecutor {
 
     private void handlePlayer(Player player) {
         UpdatifierService api = UpdatifierService.getInstance();
-        pluginInstance.getUpdates().entrySet().forEach(entry -> {
+        plugin.getUpdates().entrySet().forEach(entry -> {
             String name = entry.getKey();
             player.sendMessage(Text.of(TextColors.YELLOW, "An update is available for ", TextColors.GREEN, name, "!"));
 
             String repoOwner = entry.getValue().split("/")[0];
             String repoName = entry.getValue().split("/")[1];
-            if (pluginInstance.showChangelogs()) {
+            if (plugin.showChangelogs()) {
                 String body = api.getBody(repoOwner, repoName).replaceAll("\r", "").replaceAll("\n", "");
                 if (body.contains("<!--") && body.contains("-->")) {
                     String result = body.substring(body.indexOf("<!--") + 4, body.indexOf("-->"));
@@ -89,7 +87,7 @@ public class GetUpdatesExecutor implements CommandExecutor {
                     }
                 }
             }
-            if (pluginInstance.downloadUpdates()) {
+            if (plugin.downloadUpdates()) {
                 player.sendMessage(Text.of(TextColors.YELLOW, "It will be downloaded to ", TextColors.GREEN,
                         "updates/" + api.getFileName(repoOwner, repoName)));
             } else {
@@ -105,21 +103,21 @@ public class GetUpdatesExecutor implements CommandExecutor {
                 player.sendMessage(Text.of(TextColors.YELLOW, "Download it here: ", text));
             }
         });
-        if (pluginInstance.getUpdates().isEmpty()) {
+        if (plugin.getUpdates().isEmpty()) {
             player.sendMessage(Text.of("All plugins are latest, you are good now!"));
         }
     }
 
     private void handleConsole() {
-        Logger logger = pluginInstance.getLogger();
-        pluginInstance.getUpdates().entrySet().forEach(entry -> {
+        Logger logger = plugin.getLogger();
+        plugin.getUpdates().entrySet().forEach(entry -> {
             Task.builder().execute(task -> {
                 String name = entry.getKey();
                 logger.info("An update is available for " + name + "!");
 
                 String repoOwner = entry.getValue().split("/")[0];
                 String repoName = entry.getValue().split("/")[1];
-                if (pluginInstance.showChangelogs()) {
+                if (plugin.showChangelogs()) {
                     String body = UpdatifierService.getInstance().getBody(repoOwner, repoName).replaceAll("\r", "").replaceAll("\n", "");
                     if (body.contains("<!--") && body.contains("-->")) {
                         String result = body.substring(body.indexOf("<!--") + 4, body.indexOf("-->"));
@@ -131,19 +129,19 @@ public class GetUpdatesExecutor implements CommandExecutor {
                         }
                     }
                 }
-                if (pluginInstance.downloadUpdates()) {
+                if (plugin.downloadUpdates()) {
                     logger.info("It will be downloaded to 'updates/"
                             + UpdatifierService.getInstance().getFileName(repoOwner, repoName));
                 } else {
                     logger.info("Download it here: " + "https://github.com/" + repoOwner + "/" + repoName
                             + "/releases");
                 }
-            }).submit(pluginInstance);
+            }).submit(plugin);
         });
-        if (pluginInstance.getUpdates().isEmpty()) {
+        if (plugin.getUpdates().isEmpty()) {
             Task.builder().execute(task -> {
                 logger.info("All plugins are latest, you are good now!");
-            }).submit(pluginInstance);
+            }).submit(plugin);
         }
     }
 

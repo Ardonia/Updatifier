@@ -25,6 +25,9 @@
 
 package me.flibio.updatifier.command;
 
+import static me.flibio.updatifier.UpdatifierPlugin.getInjector;
+
+import com.google.inject.Inject;
 import me.flibio.updatifier.PluginInfo;
 import me.flibio.updatifier.UpdatifierPlugin;
 
@@ -37,15 +40,12 @@ import org.spongepowered.api.text.Text;
  */
 public final class UpdatifierCommands {
 
-    private static final UpdatifierCommands INSTANCE = new UpdatifierCommands();
+    private final UpdatifierPlugin plugin;
     private CommandSpec commandGetUpdates;
-    private UpdatifierPlugin pluginInstance = UpdatifierPlugin.getInstance();
 
-    private UpdatifierCommands() {
-    }
-
-    public static UpdatifierCommands getInstance() {
-        return UpdatifierCommands.INSTANCE;
+    @Inject
+    private UpdatifierCommands(UpdatifierPlugin plugin) {
+        this.plugin = plugin;
     }
 
     public CommandSpec getCommandGetUpdates() {
@@ -54,7 +54,7 @@ public final class UpdatifierCommands {
 
     public void init() {
         commandGetUpdates = CommandSpec.builder()
-                .executor(GetUpdatesExecutor.getInstance())
+                .executor(getInjector().getInstance(GetUpdatesExecutor.class))
                 .permission(PluginInfo.PERM_NOTIFY)
                 .description(Text.of("Get available plugin updates."))
                 .arguments()
@@ -62,7 +62,7 @@ public final class UpdatifierCommands {
     }
 
     public void registerAll() {
-        Sponge.getCommandManager().register(pluginInstance, commandGetUpdates, "getUpdates", "updates");
+        Sponge.getCommandManager().register(plugin, commandGetUpdates, "getUpdates", "updates");
     }
 
 }

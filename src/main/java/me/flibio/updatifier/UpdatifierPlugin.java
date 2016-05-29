@@ -33,6 +33,7 @@ import static me.flibio.updatifier.PluginInfo.VERSION;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import me.flibio.updatifier.command.UpdatifierCommands;
 import net.minecrell.mcstats.SpongeStatsLite;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
@@ -63,23 +64,28 @@ import java.util.Map;
 @Updatifier(repoName = "Updatifier", repoOwner = "FlibioStudio", version = "v" + VERSION)
 public class UpdatifierPlugin {
 
-    private static UpdatifierPlugin instance;
+    private static Injector injector;
+    private final Injector providedInjector;
     private FileManager fileManager;
-    @Inject @DefaultConfig(sharedRoot = false) private ConfigurationLoader<CommentedConfigurationNode> defaultRoot;
-    @Inject private Logger logger;
-    @Inject private SpongeStatsLite statsLite;
+    private final ConfigurationLoader<CommentedConfigurationNode> defaultRoot;
+    private final Logger logger;
+    private final SpongeStatsLite statsLite;
     private HashMap<String, String> updates = new HashMap<>();
     private UpdatifierService api;
     private boolean downloadUpdates = false;
     private boolean showChangelogs = false;
 
     @Inject
-    private UpdatifierPlugin() {
-        instance = this;
+    private UpdatifierPlugin(Injector injector, @DefaultConfig(sharedRoot = false) ConfigurationLoader<CommentedConfigurationNode> defaultRoot,
+            Logger logger, SpongeStatsLite statsLite) {
+        providedInjector = injector;
+        this.defaultRoot = defaultRoot;
+        this.logger = logger;
+        this.statsLite = statsLite;
     }
 
-    public static UpdatifierPlugin getInstance() {
-        return instance;
+    public static Injector getInjector() {
+        return injector;
     }
 
     public Logger getLogger() {
@@ -100,6 +106,8 @@ public class UpdatifierPlugin {
 
     @Listener
     public void onPreInitialize(GamePreInitializationEvent event) {
+        injector = providedInjector;
+
         this.statsLite.start();
         this.api = new UpdatifierServiceImpl(this);
         this.fileManager = new FileManager(this.logger, this.defaultRoot);
@@ -109,8 +117,10 @@ public class UpdatifierPlugin {
 
     @Listener
     public void started(GameStartedServerEvent event) {
-        UpdatifierCommands.getInstance().init();
-        UpdatifierCommands.getInstance().registerAll();
+        UpdatifierCommands commands = getInjector().getInstance(UpdatifierCommands.class);
+        commands.init();
+        commands.registerAll();
+
         Sponge.getPluginManager().getPlugins().forEach(pluginC -> {
             if (pluginC.getInstance().isPresent()) {
                 if (pluginC.getInstance().get().getClass().isAnnotationPresent(Updatifier.class)) {
