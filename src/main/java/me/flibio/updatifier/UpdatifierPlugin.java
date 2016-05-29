@@ -1,4 +1,4 @@
-/**
+/*
  * This file is part of Updatifier, licensed under the MIT License (MIT).
  *
  * Copyright (c) 2016 - 2016 FlibioStudio <http://github.com/FlibioStudio>
@@ -22,7 +22,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 package me.flibio.updatifier;
 
 import static me.flibio.updatifier.PluginInfo.DESCRIPTION;
@@ -65,13 +64,9 @@ public class UpdatifierPlugin {
 
     private static UpdatifierPlugin instance;
     private FileManager fileManager;
-    @Inject
-    @DefaultConfig(sharedRoot = false)
-    private ConfigurationLoader<CommentedConfigurationNode> defaultRoot;
-    @Inject
-    private Logger logger;
-    @Inject
-    private SpongeStatsLite statsLite;
+    @Inject @DefaultConfig(sharedRoot = false) private ConfigurationLoader<CommentedConfigurationNode> defaultRoot;
+    @Inject private Logger logger;
+    @Inject private SpongeStatsLite statsLite;
     private HashMap<String, String> updates = new HashMap<>();
     private UpdatifierService api;
     private boolean downloadUpdates = false;

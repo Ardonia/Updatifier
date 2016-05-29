@@ -1,4 +1,4 @@
-/**
+/*
  * This file is part of Updatifier, licensed under the MIT License (MIT).
  *
  * Copyright (c) 2016 - 2016 FlibioStudio <http://github.com/FlibioStudio>
@@ -22,8 +22,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 package me.flibio.updatifier;
+
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 

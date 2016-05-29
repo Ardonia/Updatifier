@@ -1,4 +1,4 @@
-/**
+/*
  * This file is part of Updatifier, licensed under the MIT License (MIT).
  *
  * Copyright (c) 2016 - 2016 FlibioStudio <http://github.com/FlibioStudio>
@@ -22,7 +22,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 package me.flibio.updatifier;
 
 import org.spongepowered.api.Sponge;
@@ -59,12 +58,10 @@ public interface UpdatifierService {
      * Checks if an update is available for the specified GitHub repository.
      * Connects to GitHub, so it should be run in an async thread.
      *
-     * @param repoOwner
-     *        The owner of the repository
-     * @param repoName
-     *        The name of the repository
-     * @param currentVersion
-     *        The current plugin version to check against the latest release tag
+     * @param repoOwner The owner of the repository
+     * @param repoName The name of the repository
+     * @param currentVersion The current plugin version to check against the
+     *        latest release tag
      * @return If an update is available or not
      */
     public abstract boolean updateAvailable(String repoOwner, String repoName, String currentVersion);

@@ -114,7 +114,6 @@ license {
     ext.currentYear = project.currentYear
     header rootProject.file('HEADER.txt')
     include '**/*.java'
-    style.java = 'JAVADOC'
 }
 
 build.dependsOn checkLicenses

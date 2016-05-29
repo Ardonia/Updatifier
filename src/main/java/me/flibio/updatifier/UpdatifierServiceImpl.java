@@ -1,4 +1,4 @@
-/**
+/*
  * This file is part of Updatifier, licensed under the MIT License (MIT).
  *
  * Copyright (c) 2016 - 2016 FlibioStudio <http://github.com/FlibioStudio>
@@ -22,7 +22,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 package me.flibio.updatifier;
 
 import com.google.gson.Gson;
