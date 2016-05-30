@@ -37,6 +37,9 @@ import me.flibio.updatifier.command.UpdatifierCommands;
 import net.minecrell.mcstats.SpongeStatsLite;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
+import org.apache.maven.artifact.repository.metadata.Metadata;
+import org.apache.maven.artifact.repository.metadata.Versioning;
+import org.apache.maven.artifact.repository.metadata.io.xpp3.MetadataXpp3Reader;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.config.DefaultConfig;
@@ -53,6 +56,7 @@ import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.io.FileOutputStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.channels.Channels;
@@ -60,6 +64,8 @@ import java.nio.channels.ReadableByteChannel;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import javax.annotation.Nonnull;
 
 @Plugin(id = ID, name = NAME, version = VERSION, dependencies = {}, description = DESCRIPTION)
 @Updatifier(repoName = "Updatifier", repoOwner = "FlibioStudio", version = "v" + VERSION)
@@ -78,6 +84,7 @@ public class UpdatifierPlugin {
     private UpdatifierService api;
     private boolean downloadUpdates = false;
     private boolean showChangelogs = false;
+    private MetadataXpp3Reader xpp3Reader = new MetadataXpp3Reader();
 
     @Inject
     private UpdatifierPlugin() {
@@ -131,18 +138,30 @@ public class UpdatifierPlugin {
                         checkUpdatifier(pluginC, pluginClass.getAnnotation(Updatifier.class));
                     }
                     if (pluginClass.isAnnotationPresent(Maven.class)) {
-                        checkUpdatifier(pluginC, pluginClass.getAnnotation(Updatifier.class));
+                        checkMaven(pluginC, pluginClass.getAnnotation(Maven.class));
                     }
                 }
             }
         });
     }
 
-    private void checkMaven(PluginContainer pluginContainer, Maven info) {
-
+    private void checkMaven(PluginContainer pluginContainer, @Nonnull Maven info) {
+        Task.builder().execute(task -> {
+            try {
+                HttpURLConnection conn = HttpUtils.getConnection(getMavenUrl(info));
+                Metadata metadata = this.xpp3Reader.read(conn.getInputStream());
+                Versioning versioning = metadata.getVersioning();
+            } catch (Exception e) {
+                this.logger.warn("Maven exception for plugin {} ", pluginContainer.getId(), e);
+            }
+        });
     }
 
-    private void checkUpdatifier(PluginContainer pluginC, Updatifier info) {
+    private static String getMavenUrl(Maven info) {
+        return info.repo() + info.groupId() + info.artifactId() + "maven-metadata.xml";
+    }
+
+    private void checkUpdatifier(PluginContainer pluginC, @Nonnull Updatifier info) {
         Task.builder().execute(task -> {
             boolean available = this.api.updateAvailable(info.repoOwner(), info.repoName(), info.version());
             if (available) {

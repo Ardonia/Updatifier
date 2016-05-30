@@ -27,6 +27,7 @@ package me.flibio.updatifier;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -36,6 +37,17 @@ import java.net.URL;
 public class HttpUtils {
 
     private static final String USER_AGENT = "Mozilla/5.0";
+
+    public static HttpURLConnection getConnection(URL url) throws Exception {
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod("GET");
+        con.setRequestProperty("User-Agent", USER_AGENT);
+        return con;
+    }
+
+    public static HttpURLConnection getConnection(String url) throws Exception {
+        return getConnection(new URL(url));
+    }
 
     public static String requestData(String url) {
         URL obj;
