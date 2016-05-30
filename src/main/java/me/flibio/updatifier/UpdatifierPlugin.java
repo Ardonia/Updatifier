@@ -25,12 +25,6 @@
 
 package me.flibio.updatifier;
 
-import static me.flibio.updatifier.PluginInfo.DESCRIPTION;
-import static me.flibio.updatifier.PluginInfo.ID;
-import static me.flibio.updatifier.PluginInfo.NAME;
-import static me.flibio.updatifier.PluginInfo.PERM_NOTIFY;
-import static me.flibio.updatifier.PluginInfo.VERSION;
-
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -60,8 +54,8 @@ import java.nio.channels.ReadableByteChannel;
 import java.util.HashMap;
 import java.util.Map;
 
-@Plugin(id = ID, name = NAME, version = VERSION, dependencies = {}, description = DESCRIPTION)
-@Updatifier(repoName = "Updatifier", repoOwner = "FlibioStudio", version = "v" + VERSION)
+@Plugin(id = "me.flibio.updatifier")
+@Updatifier(repoName = "Updatifier", repoOwner = "FlibioStudio", version = "v1.4.0") // For now we need to put the version like this, but later we can use the metafile system.
 public class UpdatifierPlugin {
 
     private static Injector injector;
@@ -181,7 +175,7 @@ public class UpdatifierPlugin {
     @Listener
     public void onJoin(ClientConnectionEvent.Join event) {
         Player player = event.getTargetEntity();
-        if (player.hasPermission(PERM_NOTIFY)) {
+        if (player.hasPermission("updatifier.notify")) {
             for (String name : this.updates.keySet()) {
                 player.sendMessage(Text.of(TextColors.YELLOW, "An update is available for ", TextColors.GREEN, name, "!"));
 

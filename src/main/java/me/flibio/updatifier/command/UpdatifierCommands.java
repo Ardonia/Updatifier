@@ -28,9 +28,7 @@ package me.flibio.updatifier.command;
 import static me.flibio.updatifier.UpdatifierPlugin.getInjector;
 
 import com.google.inject.Inject;
-import me.flibio.updatifier.PluginInfo;
 import me.flibio.updatifier.UpdatifierPlugin;
-
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.text.Text;
@@ -55,7 +53,7 @@ public final class UpdatifierCommands {
     public void init() {
         commandGetUpdates = CommandSpec.builder()
                 .executor(getInjector().getInstance(GetUpdatesExecutor.class))
-                .permission(PluginInfo.PERM_NOTIFY)
+                .permission("updatifier.notify")
                 .description(Text.of("Get available plugin updates."))
                 .arguments()
                 .build();

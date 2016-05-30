@@ -3,7 +3,6 @@ plugins {
     id 'maven'
     id "org.spongepowered.plugin" version "0.5.1"
     id 'net.minecrell.licenser' version '0.1.3'
-    id 'net.ellune.blossom' version '1.0.1'
 }
 
 repositories {
@@ -29,13 +28,15 @@ ext {
     pluginClass = "${pluginPackage}.UpdatifierPlugin"
 }
 
-sponge.plugin.id = project.id
-
-blossom {
-    replaceToken '@project.version@', project.version, 'src/main/java/me/flibio/updatifier/PluginInfo.java'
-    replaceToken '@project.id@', project.id, 'src/main/java/me/flibio/updatifier/PluginInfo.java'
-    replaceToken '@project.name@', project.name, 'src/main/java/me/flibio/updatifier/PluginInfo.java'
-    replaceToken '@project.description@', project.description, 'src/main/java/me/flibio/updatifier/PluginInfo.java'
+sponge {
+    plugin {
+        id = project.id
+        meta {
+            name = project.name
+            version = project.version
+            description = project.description
+        }
+    }
 }
 
 archivesBaseName = project.name
