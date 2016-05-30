@@ -1,18 +1,11 @@
 plugins {
-    id 'java'
     id 'maven'
     id "org.spongepowered.plugin" version "0.5.1"
-    id 'net.minecrell.licenser' version '0.1.3'
+    id 'net.minecrell.licenser' version '0.1.5'
     id 'net.ellune.blossom' version '1.0.1'
 }
 
 repositories {
-    mavenCentral()
-    jcenter()
-    maven {
-        name 'Sponge maven repo'
-        url 'http://repo.spongepowered.org/maven'
-    }
     maven {
         name = 'minecrell-releases'
         url = 'http://repo.minecrell.net/releases'
@@ -20,9 +13,6 @@ repositories {
 }
 
 defaultTasks 'clean', 'build'
-
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
 
 ext {
     pluginPackage = "${project.id}"
@@ -106,17 +96,17 @@ jar {
 }
 
 license {
-    ext.name = project.name
-    ext.organization = project.organization
-    ext.url = project.url
-    ext.inceptionYear = project.inceptionYear
-    ext.currentYear = project.currentYear
-    header rootProject.file('HEADER.txt')
+    ext {
+        name = project.name
+        organization = project.organization
+        url = project.url
+        inceptionYear = project.inceptionYear
+        currentYear = project.currentYear
+    }
+    
+    header = rootProject.file('HEADER.txt')
     include '**/*.java'
-    style.java = 'BLOCK_COMMENT'
 }
-
-build.dependsOn checkLicenses
 
 artifacts {
     archives apiJar
