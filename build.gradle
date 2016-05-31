@@ -37,7 +37,7 @@ configurations {
 }
 
 sourceSets {
-    api.java.srcDir 'api/src/main/java'
+    api.java.srcDir 'src/api/java'
     main {
         compileClasspath += api.output
     }
