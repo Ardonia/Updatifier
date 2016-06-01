@@ -60,7 +60,7 @@ import java.nio.channels.ReadableByteChannel;
 import java.util.HashMap;
 import java.util.Map;
 
-@Plugin(id = ID, name = NAME, version = VERSION, dependencies = {}, description = DESCRIPTION)
+@Plugin(id = ID, name = NAME, version = VERSION, description = DESCRIPTION, authors = {"Flibio", "liach", "KingGoesGaming"})
 @Updatifier(repoName = "Updatifier", repoOwner = "FlibioStudio", version = "v" + VERSION)
 public class UpdatifierPlugin {
 
