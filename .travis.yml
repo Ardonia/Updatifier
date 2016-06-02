@@ -4,6 +4,9 @@ before_install: chmod +x gradlew
 script: ./gradlew
 notifications:
   email: false
+  webhooks:
+    urls:
+    - https://webhooks.gitter.im/e/1414e9a492527affee91
 env:
   global:
     TERM=dumb
