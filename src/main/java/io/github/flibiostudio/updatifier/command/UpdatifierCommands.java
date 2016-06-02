@@ -23,39 +23,46 @@
  * THE SOFTWARE.
  */
 
-package me.flibio.updatifier;
+package io.github.flibiostudio.updatifier.command;
 
-public class ReleaseData {
+import static io.github.flibiostudio.updatifier.UpdatifierPlugin.getInjector;
 
-    private String tag_name;
-    private String body;
-    private boolean prerelease;
-    private String html_url;
-    private String published_at;
-    private AssetData[] assets;
+import com.google.inject.Inject;
+import io.github.flibiostudio.updatifier.PluginInfo;
+import io.github.flibiostudio.updatifier.UpdatifierPlugin;
 
-    public String getName() {
-        return tag_name;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.text.Text;
+
+/**
+ * Utility command class for Updatifier plugin.
+ */
+public final class UpdatifierCommands {
+
+    private final UpdatifierPlugin plugin;
+    private CommandSpec commandGetUpdates;
+
+    @Inject
+    private UpdatifierCommands(UpdatifierPlugin plugin) {
+        this.plugin = plugin;
     }
 
-    public String getUrl() {
-        return html_url;
+    public CommandSpec getCommandGetUpdates() {
+        return this.commandGetUpdates;
     }
 
-    public String publishedAt() {
-        return published_at;
+    public void init() {
+        commandGetUpdates = CommandSpec.builder()
+                .executor(getInjector().getInstance(GetUpdatesExecutor.class))
+                .permission(PluginInfo.PERM_NOTIFY)
+                .description(Text.of("Get available plugin updates."))
+                .arguments()
+                .build();
     }
 
-    public boolean isPreRelease() {
-        return prerelease;
-    }
-
-    public String body() {
-        return body;
-    }
-
-    public AssetData[] assets() {
-        return assets;
+    public void registerAll() {
+        Sponge.getCommandManager().register(plugin, commandGetUpdates, "getUpdates", "updates");
     }
 
 }

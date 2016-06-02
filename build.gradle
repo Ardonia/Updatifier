@@ -22,10 +22,11 @@ ext {
 sponge.plugin.id = project.id
 
 blossom {
-    replaceToken '@project.version@', project.version, 'src/main/java/me/flibio/updatifier/PluginInfo.java'
-    replaceToken '@project.id@', project.id, 'src/main/java/me/flibio/updatifier/PluginInfo.java'
-    replaceToken '@project.name@', project.name, 'src/main/java/me/flibio/updatifier/PluginInfo.java'
-    replaceToken '@project.description@', project.description, 'src/main/java/me/flibio/updatifier/PluginInfo.java'
+    String path = 'src/main/java/io/github/flibiostudio/updatifier/PluginInfo.java'
+    replaceToken '@project.version@', project.version, path
+    replaceToken '@project.id@', project.id, path
+    replaceToken '@project.name@', project.name, path
+    replaceToken '@project.description@', project.description, path
 }
 
 archivesBaseName = project.name
