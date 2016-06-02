@@ -23,18 +23,39 @@
  * THE SOFTWARE.
  */
 
-package me.flibio.updatifier;
+package io.github.flibiostudio.updatifier;
 
-public class AssetData {
+public class ReleaseData {
 
-    private String browser_download_url;
-    private String name;
+    private String tag_name;
+    private String body;
+    private boolean prerelease;
+    private String html_url;
+    private String published_at;
+    private AssetData[] assets;
 
-    public String name() {
-        return name;
+    public String getName() {
+        return tag_name;
     }
 
-    public String browserDownloadUrl() {
-        return browser_download_url;
+    public String getUrl() {
+        return html_url;
     }
+
+    public String publishedAt() {
+        return published_at;
+    }
+
+    public boolean isPreRelease() {
+        return prerelease;
+    }
+
+    public String body() {
+        return body;
+    }
+
+    public AssetData[] assets() {
+        return assets;
+    }
+
 }

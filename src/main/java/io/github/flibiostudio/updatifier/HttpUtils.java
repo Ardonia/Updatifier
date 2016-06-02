@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-package me.flibio.updatifier;
+package io.github.flibiostudio.updatifier;
 
 import java.io.BufferedReader;
 import java.io.IOException;

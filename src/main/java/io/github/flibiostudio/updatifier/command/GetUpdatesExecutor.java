@@ -23,10 +23,10 @@
  * THE SOFTWARE.
  */
 
-package me.flibio.updatifier.command;
+package io.github.flibiostudio.updatifier.command;
 
 import com.google.inject.Inject;
-import me.flibio.updatifier.UpdatifierPlugin;
+import io.github.flibiostudio.updatifier.UpdatifierPlugin;
 import me.flibio.updatifier.UpdatifierService;
 import org.slf4j.Logger;
 import org.spongepowered.api.command.CommandException;

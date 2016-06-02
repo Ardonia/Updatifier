@@ -23,10 +23,11 @@
  * THE SOFTWARE.
  */
 
-package me.flibio.updatifier;
+package io.github.flibiostudio.updatifier;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import me.flibio.updatifier.UpdatifierService;
 import org.spongepowered.api.Sponge;
 
 import java.text.ParseException;

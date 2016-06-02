@@ -23,46 +23,17 @@
  * THE SOFTWARE.
  */
 
-package me.flibio.updatifier.command;
+package io.github.flibiostudio.updatifier;
 
-import static me.flibio.updatifier.UpdatifierPlugin.getInjector;
+public class PluginInfo {
 
-import com.google.inject.Inject;
-import me.flibio.updatifier.PluginInfo;
-import me.flibio.updatifier.UpdatifierPlugin;
+    public static final String ID = "@project.id@";
+    public static final String NAME = "@project.name@";
+    public static final String VERSION = "@project.version@";
+    public static final String PERM_NOTIFY = "updatifier.notify";
+    public static final String DESCRIPTION = "@project.description@";
 
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.text.Text;
-
-/**
- * Utility command class for Updatifier plugin.
- */
-public final class UpdatifierCommands {
-
-    private final UpdatifierPlugin plugin;
-    private CommandSpec commandGetUpdates;
-
-    @Inject
-    private UpdatifierCommands(UpdatifierPlugin plugin) {
-        this.plugin = plugin;
-    }
-
-    public CommandSpec getCommandGetUpdates() {
-        return this.commandGetUpdates;
-    }
-
-    public void init() {
-        commandGetUpdates = CommandSpec.builder()
-                .executor(getInjector().getInstance(GetUpdatesExecutor.class))
-                .permission(PluginInfo.PERM_NOTIFY)
-                .description(Text.of("Get available plugin updates."))
-                .arguments()
-                .build();
-    }
-
-    public void registerAll() {
-        Sponge.getCommandManager().register(plugin, commandGetUpdates, "getUpdates", "updates");
+    private PluginInfo() {
     }
 
 }

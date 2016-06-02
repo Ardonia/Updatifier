@@ -23,17 +23,18 @@
  * THE SOFTWARE.
  */
 
-package me.flibio.updatifier;
+package io.github.flibiostudio.updatifier;
 
-public class PluginInfo {
+public class AssetData {
 
-    public static final String ID = "@project.id@";
-    public static final String NAME = "@project.name@";
-    public static final String VERSION = "@project.version@";
-    public static final String PERM_NOTIFY = "updatifier.notify";
-    public static final String DESCRIPTION = "@project.description@";
+    private String browser_download_url;
+    private String name;
 
-    private PluginInfo() {
+    public String name() {
+        return name;
     }
 
+    public String browserDownloadUrl() {
+        return browser_download_url;
+    }
 }
