@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-package me.flibio.updatifier;
+package io.github.flibiostudio.updatifier;
 
 public class AssetData {
 

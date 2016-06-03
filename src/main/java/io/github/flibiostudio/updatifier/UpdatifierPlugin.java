@@ -23,18 +23,20 @@
  * THE SOFTWARE.
  */
 
-package me.flibio.updatifier;
+package io.github.flibiostudio.updatifier;
 
-import static me.flibio.updatifier.PluginInfo.DESCRIPTION;
-import static me.flibio.updatifier.PluginInfo.ID;
-import static me.flibio.updatifier.PluginInfo.NAME;
-import static me.flibio.updatifier.PluginInfo.PERM_NOTIFY;
-import static me.flibio.updatifier.PluginInfo.VERSION;
+import static io.github.flibiostudio.updatifier.PluginInfo.DESCRIPTION;
+import static io.github.flibiostudio.updatifier.PluginInfo.ID;
+import static io.github.flibiostudio.updatifier.PluginInfo.NAME;
+import static io.github.flibiostudio.updatifier.PluginInfo.PERM_NOTIFY;
+import static io.github.flibiostudio.updatifier.PluginInfo.VERSION;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import me.flibio.updatifier.command.UpdatifierCommands;
+import me.flibio.updatifier.Updatifier;
+import me.flibio.updatifier.UpdatifierService;
+import io.github.flibiostudio.updatifier.command.UpdatifierCommands;
 import net.minecrell.mcstats.SpongeStatsLite;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
@@ -60,7 +62,7 @@ import java.nio.channels.ReadableByteChannel;
 import java.util.HashMap;
 import java.util.Map;
 
-@Plugin(id = ID, name = NAME, version = VERSION, dependencies = {}, description = DESCRIPTION)
+@Plugin(id = ID, name = NAME, version = VERSION, description = DESCRIPTION, authors = {"Flibio", "liach", "KingGoesGaming"})
 @Updatifier(repoName = "Updatifier", repoOwner = "FlibioStudio", version = "v" + VERSION)
 public class UpdatifierPlugin {
 

@@ -23,17 +23,21 @@
  * THE SOFTWARE.
  */
 
-package me.flibio.updatifier;
+package io.github.flibiostudio.updatifier.command.annotation;
 
-public class PluginInfo {
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-    public static final String ID = "@project.id@";
-    public static final String NAME = "@project.name@";
-    public static final String VERSION = "@project.version@";
-    public static final String PERM_NOTIFY = "updatifier.notify";
-    public static final String DESCRIPTION = "@project.description@";
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
-    private PluginInfo() {
-    }
+/**
+ * The description and extended description for the command.
+ */
+@Retention(RUNTIME)
+@Target(TYPE)
+public @interface Description {
+
+    String value();
 
 }

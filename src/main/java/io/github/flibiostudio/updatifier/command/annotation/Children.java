@@ -23,46 +23,23 @@
  * THE SOFTWARE.
  */
 
-package me.flibio.updatifier.command;
+package io.github.flibiostudio.updatifier.command.annotation;
 
-import static me.flibio.updatifier.UpdatifierPlugin.getInjector;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import com.google.inject.Inject;
-import me.flibio.updatifier.PluginInfo;
-import me.flibio.updatifier.UpdatifierPlugin;
+import io.github.flibiostudio.updatifier.command.CommandBase;
 
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.text.Text;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
 /**
- * Utility command class for Updatifier plugin.
+ * The children for the command.
  */
-public final class UpdatifierCommands {
+@Retention(RUNTIME)
+@Target(TYPE)
+public @interface Children {
 
-    private final UpdatifierPlugin plugin;
-    private CommandSpec commandGetUpdates;
-
-    @Inject
-    private UpdatifierCommands(UpdatifierPlugin plugin) {
-        this.plugin = plugin;
-    }
-
-    public CommandSpec getCommandGetUpdates() {
-        return this.commandGetUpdates;
-    }
-
-    public void init() {
-        commandGetUpdates = CommandSpec.builder()
-                .executor(getInjector().getInstance(GetUpdatesExecutor.class))
-                .permission(PluginInfo.PERM_NOTIFY)
-                .description(Text.of("Get available plugin updates."))
-                .arguments()
-                .build();
-    }
-
-    public void registerAll() {
-        Sponge.getCommandManager().register(plugin, commandGetUpdates, "getUpdates", "updates");
-    }
+    Class<? extends CommandBase>[] value();
 
 }

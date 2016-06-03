@@ -1,21 +1,18 @@
+# IntelliJ
+.idea/
+*.iws
+/out/
+
 # Gradle
 .gradle
 build/
 gradle-app.setting
-.settings/
-bin/
-run/
-out/
-classes/
-resources/
+!gradle-wrapper.jar
 
 # Eclipse
-eclipse/
-.classpath
+bin/
+tmp/
+local.properties
+.settings/
 .project
-
-# Idea
-.idea/
-*.iml
-*.ipr
-*.iws
+.factorypath

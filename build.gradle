@@ -1,18 +1,11 @@
 plugins {
-    id 'java'
     id 'maven'
     id "org.spongepowered.plugin" version "0.5.1"
-    id 'net.minecrell.licenser' version '0.1.3'
+    id 'net.minecrell.licenser' version '0.1.5'
     id 'net.ellune.blossom' version '1.0.1'
 }
 
 repositories {
-    mavenCentral()
-    jcenter()
-    maven {
-        name 'Sponge maven repo'
-        url 'http://repo.spongepowered.org/maven'
-    }
     maven {
         name = 'minecrell-releases'
         url = 'http://repo.minecrell.net/releases'
@@ -20,9 +13,6 @@ repositories {
 }
 
 defaultTasks 'clean', 'build'
-
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
 
 ext {
     pluginPackage = "${project.id}"
@@ -32,10 +22,11 @@ ext {
 sponge.plugin.id = project.id
 
 blossom {
-    replaceToken '@project.version@', project.version, 'src/main/java/me/flibio/updatifier/PluginInfo.java'
-    replaceToken '@project.id@', project.id, 'src/main/java/me/flibio/updatifier/PluginInfo.java'
-    replaceToken '@project.name@', project.name, 'src/main/java/me/flibio/updatifier/PluginInfo.java'
-    replaceToken '@project.description@', project.description, 'src/main/java/me/flibio/updatifier/PluginInfo.java'
+    String path = 'src/main/java/io/github/flibiostudio/updatifier/PluginInfo.java'
+    replaceToken '@project.version@', project.version, path
+    replaceToken '@project.id@', project.id, path
+    replaceToken '@project.name@', project.name, path
+    replaceToken '@project.description@', project.description, path
 }
 
 archivesBaseName = project.name
@@ -47,7 +38,7 @@ configurations {
 }
 
 sourceSets {
-    api.java.srcDir 'api/src/main/java'
+    api.java.srcDir 'src/api/java'
     main {
         compileClasspath += api.output
     }
@@ -106,17 +97,17 @@ jar {
 }
 
 license {
-    ext.name = project.name
-    ext.organization = project.organization
-    ext.url = project.url
-    ext.inceptionYear = project.inceptionYear
-    ext.currentYear = project.currentYear
-    header rootProject.file('HEADER.txt')
+    ext {
+        name = project.name
+        organization = project.organization
+        url = project.url
+        inceptionYear = project.inceptionYear
+        currentYear = project.currentYear
+    }
+    
+    header = rootProject.file('HEADER.txt')
     include '**/*.java'
-    style.java = 'BLOCK_COMMENT'
 }
-
-build.dependsOn checkLicenses
 
 artifacts {
     archives apiJar

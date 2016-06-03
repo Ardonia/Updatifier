@@ -23,39 +23,23 @@
  * THE SOFTWARE.
  */
 
-package me.flibio.updatifier;
+package io.github.flibiostudio.updatifier.command.annotation;
 
-public class ReleaseData {
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-    private String tag_name;
-    private String body;
-    private boolean prerelease;
-    private String html_url;
-    private String published_at;
-    private AssetData[] assets;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
-    public String getName() {
-        return tag_name;
-    }
-
-    public String getUrl() {
-        return html_url;
-    }
-
-    public String publishedAt() {
-        return published_at;
-    }
-
-    public boolean isPreRelease() {
-        return prerelease;
-    }
-
-    public String body() {
-        return body;
-    }
-
-    public AssetData[] assets() {
-        return assets;
-    }
+/**
+ * Marks the command does not register its executor.
+ *
+ * <p>
+ *     Used for base commands that themselves cannot be executed but subcommands can be.
+ * </p>
+ */
+@Retention(RUNTIME)
+@Target(TYPE)
+public @interface NoExecutor {
 
 }
